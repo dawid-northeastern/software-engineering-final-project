@@ -26,8 +26,6 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final overlay = Colors.black.withOpacity(0.35);
-
     return Scaffold(
       body: Stack(
         fit: StackFit.expand,
@@ -44,7 +42,7 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
           ),
-          Container(color: overlay),
+          Container(color: Colors.black.withOpacity(0.35)),
           Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -68,7 +66,7 @@ class HomeScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 10),
                 const Text(
-                  'Master the art of cooking steaks!',
+                  'Skill Simulator. Learn precision cooking.',
                   style: TextStyle(
                     color: Colors.white70,
                     fontSize: 16,
@@ -81,12 +79,76 @@ class HomeScreen extends StatelessWidget {
                     backgroundColor: Colors.brown,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
-                  onPressed: () {},
-                  child: const Text("Let's Cook"),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const IntroScreen()),
+                    );
+                  },
+                  child: const Text("Begin Training"),
                 ),
               ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class IntroScreen extends StatelessWidget {
+  const IntroScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          Image.asset('assets/kitchen.jpg', fit: BoxFit.cover),
+          Container(color: Colors.black.withOpacity(0.35)),
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  const Spacer(),
+                  Container(
+                    padding: const EdgeInsets.all(18),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFFF7E6).withOpacity(0.97),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.brown.withOpacity(0.25)),
+                    ),
+                    child: const Text(
+                      "Your goal is to prepare steaks exactly according to each client's preferences.\n\n"
+                      "Use the training modules to build your knowledge, then apply it in assessment rounds.",
+                      style: TextStyle(fontSize: 16.5, height: 1.35),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton(
+                      style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        backgroundColor: Colors.brown,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      onPressed: () {},
+                      child: const Text("Continue"),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                ],
+              ),
             ),
           ),
         ],
