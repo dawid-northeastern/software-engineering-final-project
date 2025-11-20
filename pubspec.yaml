@@ -30,6 +30,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  audioplayers: ^6.0.0
+
   google_fonts: ^6.3.2
 
 
@@ -76,6 +78,7 @@ flutter:
     - assets/judge3.png
     - assets/salad.png
     - assets/smoke.gif
+    - assets/music/jazz.mp3
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

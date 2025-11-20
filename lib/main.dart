@@ -1,7 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 void main() {
   runApp(const SteakMasterApp());
+}
+
+class AudioController {
+  static final AudioPlayer player = AudioPlayer();
+
+  static Future<void> start() async {
+    await player.setReleaseMode(ReleaseMode.loop);
+    await player.play(AssetSource('music/jazz.mp3'));
+  }
+
+  static void stop() {
+    player.stop();
+  }
 }
 
 class SteakMasterApp extends StatelessWidget {
@@ -21,8 +35,19 @@ class SteakMasterApp extends StatelessWidget {
   }
 }
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    AudioController.start();
+  }
 
   @override
   Widget build(BuildContext context) {
