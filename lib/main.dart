@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'modules.dart';
 
 void main() {
   runApp(const SteakMasterApp());
@@ -170,6 +171,7 @@ class IntroScreen extends StatelessWidget {
                       onPressed: () {
                         Navigator.push(
                           context,
+                          // switch to modules screen
                           MaterialPageRoute(
                             builder: (_) => const ModulesScreen(),
                           ),
@@ -179,86 +181,6 @@ class IntroScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 12),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class ModulesScreen extends StatelessWidget {
-  const ModulesScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          Image.asset('assets/kitchen.jpg', fit: BoxFit.cover),
-          Container(color: Colors.black.withOpacity(0.35)),
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const Spacer(),
-                  Container(
-                    padding: const EdgeInsets.all(18),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFFF7E6).withOpacity(0.97),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.brown.withOpacity(0.25)),
-                    ),
-                    child: const Text(
-                      "Select a training module to build your foundational knowledge before attempting the assessment rounds.",
-                      style: TextStyle(fontSize: 16.5, height: 1.35),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  FilledButton(
-                    style: FilledButton.styleFrom(
-                      backgroundColor: Colors.brown,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    onPressed: () {},
-                    child: const Text("Understanding Cuts"),
-                  ),
-                  const SizedBox(height: 12),
-                  FilledButton(
-                    style: FilledButton.styleFrom(
-                      backgroundColor: Colors.brown,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    onPressed: () {},
-                    child: const Text("Thickness"),
-                  ),
-                  const SizedBox(height: 12),
-                  FilledButton(
-                    style: FilledButton.styleFrom(
-                      backgroundColor: Colors.brown,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    onPressed: () {},
-                    child: const Text("Doneness"),
-                  ),
-                  const Spacer(),
                 ],
               ),
             ),
