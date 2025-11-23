@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import 'module_screens.dart';
 
 enum ModuleStatus { notStarted, inProgress, completed }
 
-class TrainingModule {
+class Module {
   final String id;
   final String title;
   ModuleStatus status;
 
-  TrainingModule({
+  Module({
     required this.id,
     required this.title,
     this.status = ModuleStatus.notStarted,
@@ -26,22 +27,26 @@ class TrainingModule {
   }
 }
 
-class CutsModule extends TrainingModule {
-  CutsModule() : super(id: 'cuts', title: 'Understanding Cuts');
+class Cuts extends Module {
+  Cuts() : super(id: 'cuts', title: 'Understanding Cuts');
 }
 
-class ThicknessModule extends TrainingModule {
-  ThicknessModule() : super(id: 'thickness', title: 'Thickness');
+class Thickness extends Module {
+  Thickness() : super(id: 'thickness', title: 'Thickness');
 }
 
-class DonenessModule extends TrainingModule {
-  DonenessModule() : super(id: 'doneness', title: 'Doneness');
+class Doneness extends Module {
+  Doneness() : super(id: 'doneness', title: 'Doneness');
 }
 
-class TrainingProgress {
-  final List<TrainingModule> modules;
+class Cooking extends Module {
+  Cooking() : super(id: 'cooking', title: 'Cooking Method');
+}
 
-  TrainingProgress({required this.modules});
+class Progress {
+  final List<Module> modules;
+
+  Progress({required this.modules});
 
   int get totalCount {
     return modules.length;
@@ -49,8 +54,8 @@ class TrainingProgress {
 
   int get completedCount {
     int count = 0;
-    for (final module in modules) {
-      if (module.isCompleted) {
+    for (final m in modules) {
+      if (m.isCompleted) {
         count++;
       }
     }
@@ -67,8 +72,8 @@ class ModulesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final progress = TrainingProgress(
-      modules: [CutsModule(), ThicknessModule(), DonenessModule()],
+    final progress = Progress(
+      modules: [Cuts(), Thickness(), Doneness(), Cooking()],
     );
 
     return Scaffold(
@@ -113,6 +118,84 @@ class ModulesScreen extends StatelessWidget {
                         ),
                       ],
                     ),
+                  ),
+                  const SizedBox(height: 20),
+                  FilledButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const CutsScreen()),
+                      );
+                    },
+                    style: FilledButton.styleFrom(
+                      backgroundColor: Colors.brown,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text('Understanding Cuts'),
+                  ),
+                  const SizedBox(height: 12),
+                  FilledButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const ThicknessScreen(),
+                        ),
+                      );
+                    },
+                    style: FilledButton.styleFrom(
+                      backgroundColor: Colors.brown,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text('Thickness'),
+                  ),
+                  const SizedBox(height: 12),
+                  FilledButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const DonenessScreen(),
+                        ),
+                      );
+                    },
+                    style: FilledButton.styleFrom(
+                      backgroundColor: Colors.brown,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text('Doneness'),
+                  ),
+                  const SizedBox(height: 12),
+                  FilledButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const CookingScreen(),
+                        ),
+                      );
+                    },
+                    style: FilledButton.styleFrom(
+                      backgroundColor: Colors.brown,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text('Cooking Method'),
                   ),
                   const Spacer(),
                 ],
