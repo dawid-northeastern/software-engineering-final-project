@@ -92,10 +92,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(height: 10),
                 const Text(
                   'Skill Simulator. Learn precision cooking.',
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 16,
-                  ),
+                  style: TextStyle(color: Colors.white70, fontSize: 16),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 28),
@@ -103,7 +100,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   style: FilledButton.styleFrom(
                     backgroundColor: Colors.brown,
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 22,
+                      vertical: 14,
+                    ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -170,7 +170,9 @@ class IntroScreen extends StatelessWidget {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => const ModulesScreen()),
+                          MaterialPageRoute(
+                            builder: (_) => const ModulesScreen(),
+                          ),
                         );
                       },
                       child: const Text("Continue"),
