@@ -1,58 +1,76 @@
 import 'package:flutter/material.dart';
 import 'module_screens.dart';
 
-enum ModuleStatus { notStarted, inProgress, completed }
+enum ModuleStatus { notStarted, completed }
 
-class Module {
+class ModuleInfo {
   final String id;
   final String title;
+  final String slide1Text;
+  final String slide2Text;
+  final String questionText;
   ModuleStatus status;
 
-  Module({
+  ModuleInfo({
     required this.id,
     required this.title,
+    required this.slide1Text,
+    required this.slide2Text,
+    required this.questionText,
     this.status = ModuleStatus.notStarted,
   });
 
   bool get isCompleted {
     return status == ModuleStatus.completed;
   }
+}
 
-  void markInProgress() {
-    status = ModuleStatus.inProgress;
+class ModulesScreen extends StatefulWidget {
+  const ModulesScreen({super.key});
+
+  @override
+  State<ModulesScreen> createState() => _ModulesScreenState();
+}
+
+class _ModulesScreenState extends State<ModulesScreen> {
+  late List<ModuleInfo> modules;
+
+  @override
+  void initState() {
+    super.initState();
+    modules = [
+      ModuleInfo(
+        id: 'cuts',
+        title: 'Understanding Cuts',
+        slide1Text: 'SAMPLE TEXT for cuts module - slide 1.',
+        slide2Text: 'SAMPLE TEXT for cuts module - slide 2.',
+        questionText: 'SAMPLE QUESTION for cuts module.',
+      ),
+      ModuleInfo(
+        id: 'thickness',
+        title: 'Thickness',
+        slide1Text: 'SAMPLE TEXT for thickness module - slide 1.',
+        slide2Text: 'SAMPLE TEXT for thickness module - slide 2.',
+        questionText: 'SAMPLE QUESTION for thickness module.',
+      ),
+      ModuleInfo(
+        id: 'doneness',
+        title: 'Doneness',
+        slide1Text: 'SAMPLE TEXT for doneness module - slide 1.',
+        slide2Text: 'SAMPLE TEXT for doneness module - slide 2.',
+        questionText: 'SAMPLE QUESTION for doneness module.',
+      ),
+      ModuleInfo(
+        id: 'cooking',
+        title: 'Cooking Method',
+        slide1Text: 'SAMPLE TEXT for cooking method module - slide 1.',
+        slide2Text: 'SAMPLE TEXT for cooking method module - slide 2.',
+        questionText: 'SAMPLE QUESTION for cooking method module.',
+      ),
+    ];
   }
 
-  void markCompleted() {
-    status = ModuleStatus.completed;
-  }
-}
-
-class Cuts extends Module {
-  Cuts() : super(id: 'cuts', title: 'Understanding Cuts');
-}
-
-class Thickness extends Module {
-  Thickness() : super(id: 'thickness', title: 'Thickness');
-}
-
-class Doneness extends Module {
-  Doneness() : super(id: 'doneness', title: 'Doneness');
-}
-
-class Cooking extends Module {
-  Cooking() : super(id: 'cooking', title: 'Cooking Method');
-}
-
-class Progress {
-  final List<Module> modules;
-
-  Progress({required this.modules});
-
-  int get totalCount {
-    return modules.length;
-  }
-
-  int get completedCount {
+  int get _completedCount {
     int count = 0;
     for (final m in modules) {
       if (m.isCompleted) {
@@ -62,19 +80,23 @@ class Progress {
     return count;
   }
 
-  bool get allCompleted {
-    return completedCount == totalCount && totalCount > 0;
+  Color _buttonColor(ModuleInfo m) {
+    if (m.isCompleted) {
+      return Colors.brown.shade300; // lighter when done
+    }
+    return Colors.brown;
   }
-}
-
-class ModulesScreen extends StatelessWidget {
-  const ModulesScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final progress = Progress(
-      modules: [Cuts(), Thickness(), Doneness(), Cooking()],
-    );
+    final total = modules.length;
+    final done = _completedCount;
+    final allCompleted = done == total && total > 0;
+
+    final cuts = modules[0];
+    final thickness = modules[1];
+    final doneness = modules[2];
+    final cooking = modules[3];
 
     return Scaffold(
       body: Stack(
@@ -113,7 +135,7 @@ class ModulesScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          'Modules completed: ${progress.completedCount} / ${progress.totalCount}',
+                          'Modules completed: $done / $total',
                           style: const TextStyle(fontSize: 14),
                         ),
                       ],
@@ -124,18 +146,30 @@ class ModulesScreen extends StatelessWidget {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => const CutsScreen()),
+                        MaterialPageRoute(
+                          builder: (_) => ModuleScreen(
+                            title: cuts.title,
+                            slide1Text: cuts.slide1Text,
+                            slide2Text: cuts.slide2Text,
+                            questionText: cuts.questionText,
+                            onComplete: () {
+                              setState(() {
+                                cuts.status = ModuleStatus.completed;
+                              });
+                            },
+                          ),
+                        ),
                       );
                     },
                     style: FilledButton.styleFrom(
-                      backgroundColor: Colors.brown,
+                      backgroundColor: _buttonColor(cuts),
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: const Text('Understanding Cuts'),
+                    child: Text(cuts.title),
                   ),
                   const SizedBox(height: 12),
                   FilledButton(
@@ -143,19 +177,29 @@ class ModulesScreen extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => const ThicknessScreen(),
+                          builder: (_) => ModuleScreen(
+                            title: thickness.title,
+                            slide1Text: thickness.slide1Text,
+                            slide2Text: thickness.slide2Text,
+                            questionText: thickness.questionText,
+                            onComplete: () {
+                              setState(() {
+                                thickness.status = ModuleStatus.completed;
+                              });
+                            },
+                          ),
                         ),
                       );
                     },
                     style: FilledButton.styleFrom(
-                      backgroundColor: Colors.brown,
+                      backgroundColor: _buttonColor(thickness),
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: const Text('Thickness'),
+                    child: Text(thickness.title),
                   ),
                   const SizedBox(height: 12),
                   FilledButton(
@@ -163,19 +207,29 @@ class ModulesScreen extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => const DonenessScreen(),
+                          builder: (_) => ModuleScreen(
+                            title: doneness.title,
+                            slide1Text: doneness.slide1Text,
+                            slide2Text: doneness.slide2Text,
+                            questionText: doneness.questionText,
+                            onComplete: () {
+                              setState(() {
+                                doneness.status = ModuleStatus.completed;
+                              });
+                            },
+                          ),
                         ),
                       );
                     },
                     style: FilledButton.styleFrom(
-                      backgroundColor: Colors.brown,
+                      backgroundColor: _buttonColor(doneness),
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: const Text('Doneness'),
+                    child: Text(doneness.title),
                   ),
                   const SizedBox(height: 12),
                   FilledButton(
@@ -183,20 +237,46 @@ class ModulesScreen extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => const CookingScreen(),
+                          builder: (_) => ModuleScreen(
+                            title: cooking.title,
+                            slide1Text: cooking.slide1Text,
+                            slide2Text: cooking.slide2Text,
+                            questionText: cooking.questionText,
+                            onComplete: () {
+                              setState(() {
+                                cooking.status = ModuleStatus.completed;
+                              });
+                            },
+                          ),
                         ),
                       );
                     },
                     style: FilledButton.styleFrom(
-                      backgroundColor: Colors.brown,
+                      backgroundColor: _buttonColor(cooking),
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: const Text('Cooking Method'),
+                    child: Text(cooking.title),
                   ),
+                  const SizedBox(height: 16),
+                  if (allCompleted)
+                    FilledButton(
+                      onPressed: () {
+                        // TODO: Add logic to continue to app
+                      },
+                      style: FilledButton.styleFrom(
+                        backgroundColor: const Color.fromARGB(255, 81, 57, 48),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text('Continue to app'),
+                    ),
                   const Spacer(),
                 ],
               ),
