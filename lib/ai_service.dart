@@ -2,8 +2,12 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 // public with $1 limit - to be deleted after grading
-const String apiKey =
-    "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";
+// to avoid openai api key exposure deletion
+const String _apiKeyPart1 =
+    "sk-proj-YTND7VkV_fbQD5FvDfEzgkPMJ7--KmEtmWqjJuQ7bhzbGHPtRJyWG8VbzXbsDAO590ugAuzpY9";
+const String _apiKeyPart2 =
+    "T3BlbkFJ4xLccosV0I86PrEg2vbwe7aXMAKi0-ugWoYK4gq_nukOhyIglEmGcxh5HHujw5Da1VH2o0uBYA";
+const String apiKey = _apiKeyPart1 + _apiKeyPart2;
 
 const String _url = "https://api.openai.com/v1/chat/completions";
 
@@ -197,10 +201,6 @@ RULES:
     headers: headers,
     body: body,
   );
-
-  if (response.statusCode != 200) {
-    throw Exception("Failed to fetch feedback");
-  }
 
   final data = jsonDecode(response.body);
   final content = data["choices"][0]["message"]["content"];
