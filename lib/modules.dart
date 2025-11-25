@@ -7,16 +7,14 @@ enum ModuleStatus { notStarted, completed }
 class ModuleInfo {
   final String id;
   final String title;
-  final String slide1Text;
-  final String slide2Text;
+  final List<String> slideTexts;
   final String questionText;
   ModuleStatus status;
 
   ModuleInfo({
     required this.id,
     required this.title,
-    required this.slide1Text,
-    required this.slide2Text,
+    required this.slideTexts,
     required this.questionText,
     this.status = ModuleStatus.notStarted,
   });
@@ -40,32 +38,43 @@ class _ModulesScreenState extends State<ModulesScreen> {
   void initState() {
     super.initState();
     modules = [
+      // NOTE: you can add as many or as few slides as you want - just change the number of items in the list
       ModuleInfo(
         id: 'cuts',
         title: 'Understanding Cuts',
-        slide1Text: 'SAMPLE TEXT for cuts module - slide 1.',
-        slide2Text: 'SAMPLE TEXT for cuts module - slide 2.',
+        slideTexts: [
+          'SAMPLE TEXT for cuts module - slide 1.',
+          'SAMPLE TEXT for cuts module - slide 2.',
+          'SAMPLE TEXT for cuts module - slide 3.',
+          'SAMPLE TEXT for cuts module - slide 4.',
+        ],
         questionText: 'SAMPLE QUESTION for cuts module.',
       ),
       ModuleInfo(
         id: 'thickness',
         title: 'Thickness',
-        slide1Text: 'SAMPLE TEXT for thickness module - slide 1.',
-        slide2Text: 'SAMPLE TEXT for thickness module - slide 2.',
+        slideTexts: [
+          'SAMPLE TEXT for thickness module - slide 1.',
+          'SAMPLE TEXT for thickness module - slide 2.',
+        ],
         questionText: 'SAMPLE QUESTION for thickness module.',
       ),
       ModuleInfo(
         id: 'doneness',
         title: 'Doneness',
-        slide1Text: 'SAMPLE TEXT for doneness module - slide 1.',
-        slide2Text: 'SAMPLE TEXT for doneness module - slide 2.',
+        slideTexts: [
+          'SAMPLE TEXT for doneness module - slide 1.',
+          'SAMPLE TEXT for doneness module - slide 2.',
+        ],
         questionText: 'SAMPLE QUESTION for doneness module.',
       ),
       ModuleInfo(
         id: 'cooking',
         title: 'Cooking Method',
-        slide1Text: 'SAMPLE TEXT for cooking method module - slide 1.',
-        slide2Text: 'SAMPLE TEXT for cooking method module - slide 2.',
+        slideTexts: [
+          'SAMPLE TEXT for cooking method module - slide 1.',
+          'SAMPLE TEXT for cooking method module - slide 2.',
+        ],
         questionText: 'SAMPLE QUESTION for cooking method module.',
       ),
     ];
@@ -150,8 +159,7 @@ class _ModulesScreenState extends State<ModulesScreen> {
                         MaterialPageRoute(
                           builder: (_) => ModuleScreen(
                             title: cuts.title,
-                            slide1Text: cuts.slide1Text,
-                            slide2Text: cuts.slide2Text,
+                            slideTexts: cuts.slideTexts,
                             questionText: cuts.questionText,
                             onComplete: () {
                               setState(() {
@@ -180,8 +188,7 @@ class _ModulesScreenState extends State<ModulesScreen> {
                         MaterialPageRoute(
                           builder: (_) => ModuleScreen(
                             title: thickness.title,
-                            slide1Text: thickness.slide1Text,
-                            slide2Text: thickness.slide2Text,
+                            slideTexts: thickness.slideTexts,
                             questionText: thickness.questionText,
                             onComplete: () {
                               setState(() {
@@ -210,8 +217,7 @@ class _ModulesScreenState extends State<ModulesScreen> {
                         MaterialPageRoute(
                           builder: (_) => ModuleScreen(
                             title: doneness.title,
-                            slide1Text: doneness.slide1Text,
-                            slide2Text: doneness.slide2Text,
+                            slideTexts: doneness.slideTexts,
                             questionText: doneness.questionText,
                             onComplete: () {
                               setState(() {
@@ -240,8 +246,7 @@ class _ModulesScreenState extends State<ModulesScreen> {
                         MaterialPageRoute(
                           builder: (_) => ModuleScreen(
                             title: cooking.title,
-                            slide1Text: cooking.slide1Text,
-                            slide2Text: cooking.slide2Text,
+                            slideTexts: cooking.slideTexts,
                             questionText: cooking.questionText,
                             onComplete: () {
                               setState(() {

@@ -2,16 +2,14 @@ import 'package:flutter/material.dart';
 
 class ModuleScreen extends StatefulWidget {
   final String title;
-  final String slide1Text;
-  final String slide2Text;
+  final List<String> slideTexts;
   final String questionText;
   final VoidCallback onComplete;
 
   const ModuleScreen({
     super.key,
     required this.title,
-    required this.slide1Text,
-    required this.slide2Text,
+    required this.slideTexts,
     required this.questionText,
     required this.onComplete,
   });
@@ -26,7 +24,7 @@ class _ModuleScreenState extends State<ModuleScreen> {
 
   void _next() {
     setState(() {
-      if (index < 2) {
+      if (index < widget.slideTexts.length) {
         index++;
         feedback = null;
       }
@@ -82,7 +80,7 @@ class _ModuleScreenState extends State<ModuleScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Slide ${index + 1} of 3',
+                    'Slide ${index + 1} of ${widget.slideTexts.length + 1}',
                     style: const TextStyle(fontSize: 14, color: Colors.white70),
                   ),
                   const SizedBox(height: 16),
@@ -100,7 +98,7 @@ class _ModuleScreenState extends State<ModuleScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  if (index < 2)
+                  if (index < widget.slideTexts.length)
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -166,28 +164,16 @@ class _ModuleScreenState extends State<ModuleScreen> {
   }
 
   Widget _buildSlide() {
-    if (index == 0) {
+    if (index < widget.slideTexts.length) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Intro',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+          Text(
+            'Slide ${index + 1}',
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 8),
-          Text(widget.slide1Text),
-        ],
-      );
-    } else if (index == 1) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'More Details',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
-          ),
-          const SizedBox(height: 8),
-          Text(widget.slide2Text),
+          Text(widget.slideTexts[index]),
         ],
       );
     } else {
