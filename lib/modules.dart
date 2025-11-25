@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'module_screens.dart';
+import 'judge_game_flow.dart';   
 
 enum ModuleStatus { notStarted, completed }
 
@@ -265,7 +266,11 @@ class _ModulesScreenState extends State<ModulesScreen> {
                   if (allCompleted)
                     FilledButton(
                       onPressed: () {
-                        // TODO: Add logic to continue to app
+                        Navigator.pushNamed(
+                          context,
+                          '/judge_brief',
+                          arguments: GameState(), // i passed the game state as an argument here but we need to fix the state managemtent for sure
+                        );
                       },
                       style: FilledButton.styleFrom(
                         backgroundColor: const Color.fromARGB(255, 81, 57, 48),

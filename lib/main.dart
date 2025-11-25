@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'modules.dart';
+import 'judge_game_flow.dart';
+
 
 void main() {
   runApp(const SteakMasterApp());
@@ -25,14 +27,49 @@ class SteakMasterApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'SteakMaster',
-      theme: ThemeData(
-        colorSchemeSeed: const Color(0xFF7B3F00),
-        useMaterial3: true,
-      ),
-      home: const HomeScreen(),
+  debugShowCheckedModeBanner: false,
+  title: 'SteakMaster',
+  theme: ThemeData(
+    colorSchemeSeed: const Color(0xFF7B3F00),
+    useMaterial3: true,
+  ),
+  home: const HomeScreen(),
+  routes: {
+  '/judge_brief': (context) {
+    final state = ModalRoute.of(context)!.settings.arguments as GameState;
+    return JudgeBriefScreen(state: state);
+  },
+  '/judge_cut': (context) {
+    final args = ModalRoute.of(context)!.settings.arguments as CutFlowArgs;
+    return CutPickScreen(state: args.state, selection: args.selection);
+  },
+  '/judge_thickness': (context) {
+    final args = ModalRoute.of(context)!.settings.arguments as CutFlowArgs;
+    return ThicknessPickScreen(state: args.state, selection: args.selection);
+  },
+  '/judge_doneness': (context) {
+    final args = ModalRoute.of(context)!.settings.arguments as CutFlowArgs;
+    return DonenessPickScreen(state: args.state, selection: args.selection);
+  },
+  '/judge_summary': (context) {
+    final state = ModalRoute.of(context)!.settings.arguments as GameState;
+    return SummaryScreen(state: state);
+  },
+  '/judge_ending': (context) {
+    final a = ModalRoute.of(context)!.settings.arguments as EndingArgs;
+    return EndingScreen(
+      img: a.img,
+      title: a.title,
+      msg: a.msg,
+      total: a.total,
+      avg: a.avg,
     );
+  },
+},
+
+
+);
+
   }
 }
 
