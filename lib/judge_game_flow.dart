@@ -10,6 +10,20 @@ enum Thickness { thin, standard, thick }
 
 enum Doneness { rare, mediumRare, medium, mediumWell, wellDone }
 
+// following variables are placeholders for the AI generations
+
+// Placeholder variables for AI generations
+String judgeName = "Jordan Reed";
+int judgeAge = 34;
+String judgeProfession = "Food critic";
+String judgePersonality =
+    "calm analytical listener patient with precise feedback warm and respectful";
+
+int judgeScore = 85;
+String judgeThoughts = "Ribeye is a great choice for flavor and tenderness.";
+String judgeFeedback = "Medium rare aligns well with juiciness.";
+String judgeTip = "Ensure a well-seared crust for enhanced aroma.";
+
 String labelCut(Cut c) {
   switch (c) {
     case Cut.fillet:
