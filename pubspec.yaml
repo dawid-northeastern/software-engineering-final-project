@@ -33,6 +33,7 @@ dependencies:
   audioplayers: ^6.0.0
 
   google_fonts: ^6.3.2
+  provider: ^5.0.0
 
 
   # The following adds the Cupertino Icons font to your application.

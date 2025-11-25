@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'module_screens.dart';
+import 'training.dart';
 
 enum ModuleStatus { notStarted, completed }
 
@@ -265,7 +266,13 @@ class _ModulesScreenState extends State<ModulesScreen> {
                   if (allCompleted)
                     FilledButton(
                       onPressed: () {
-                        // TODO: Add logic to continue to app
+                        Navigator.push(
+                          context,
+                          // switch to modules screen
+                          MaterialPageRoute(
+                            builder: (_) => const PracticeScenarioScreen(),
+                          ),
+                        );
                       },
                       style: FilledButton.styleFrom(
                         backgroundColor: const Color.fromARGB(255, 81, 57, 48),
