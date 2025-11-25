@@ -1,99 +1,211 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
+// public with $1 limit - to be deleted after grading
 const String apiKey =
     "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";
 
-Future<String> getJudge() async {
-  final url = Uri.parse('https://api.openai.com/v1/chat/completions');
+const String _url = "https://api.openai.com/v1/chat/completions";
 
+class Judge {
+  final String name;
+  final int age;
+  final String profession;
+
+  final String fatPref;
+  final String tendernessPref;
+  final String crustPref;
+  final String donenessPref;
+
+  final String personality;
+
+  Judge({
+    required this.name,
+    required this.age,
+    required this.profession,
+    required this.fatPref,
+    required this.tendernessPref,
+    required this.crustPref,
+    required this.donenessPref,
+    required this.personality,
+  });
+
+  factory Judge.fromJson(Map<String, dynamic> json) {
+    return Judge(
+      name: json["name"],
+      age: json["age"],
+      profession: json["profession"],
+      fatPref: json["fat_pref"],
+      tendernessPref: json["tenderness_pref"],
+      crustPref: json["crust_pref"],
+      donenessPref: json["doneness_pref"],
+      personality: json["personality"],
+    );
+  }
+}
+
+class FeedbackResult {
+  final int score;
+  final String thoughts;
+  final String feedback;
+  final String tip;
+
+  FeedbackResult({
+    required this.score,
+    required this.thoughts,
+    required this.feedback,
+    required this.tip,
+  });
+
+  factory FeedbackResult.fromJson(Map<String, dynamic> json) {
+    return FeedbackResult(
+      score: json["score"],
+      thoughts: json["thoughts"],
+      feedback: json["feedback"],
+      tip: json["tip"],
+    );
+  }
+}
+
+// judge generation
+Future<Judge> getJudge() async {
   final headers = {
-    'Content-Type': 'application/json',
-    'Authorization': 'Bearer $apiKey',
+    "Content-Type": "application/json",
+    "Authorization": "Bearer $apiKey",
   };
 
-  final body = jsonEncode({
-    "model": "gpt-5-nano", // $0.05 per 1M tokens
-    "messages": [
-      {
-        "role": "user",
-        "content": """
-Create a fictional steak customer.
+  final prompt = """
+Create a judge or customer for a STEAK COOKING ASSESSMENT.
 
-Return ONLY JSON:
+Return STRICT JSON ONLY:
 {
-  "name": "...",
-  "age": ...,
-  "profession": "...",
-  "fat_preference": "...",
-  "tenderness": "...",
-  "crust": "...",
-  "doneness": "..."
+  "name": "",
+  "age": 0,
+  "profession": "",
+  "fat_pref": "",
+  "tenderness_pref": "",
+  "crust_pref": "",
+  "doneness_pref": "",
+  "personality": ""
 }
-""",
-      },
+
+RULES:
+- All values must be SHORT (max 8 - 15 words), except for name, age and profession keep those simple.
+- Write preferences as general tendencies only.
+- NO full sentences.
+- NO punctuation except commas.
+- JSON ONLY. No commentary, no sentences.
+- DO NOT reveal the exact steak they would choose.
+""";
+
+  final body = jsonEncode({
+    "model": "gpt-5-nano",
+    "messages": [
+      {"role": "user", "content": prompt},
     ],
     "temperature": 1.0,
   });
 
-  final response = await http.post(url, headers: headers, body: body);
+  final response = await http.post(
+    Uri.parse(_url),
+    headers: headers,
+    body: body,
+  );
 
-  if (response.statusCode == 200) {
-    final data = jsonDecode(response.body);
-    return data["choices"][0]["message"]["content"].trim();
-  } else {
-    throw Exception('Failed to fetch judge');
+  if (response.statusCode != 200) {
+    throw Exception("Failed to fetch judge profile");
   }
+
+  final data = jsonDecode(response.body);
+  final content = data["choices"][0]["message"]["content"];
+
+  final jsonMap = jsonDecode(content);
+
+  return Judge.fromJson(jsonMap);
 }
 
-Future<String> getFeedback({
-  required String judge,
+// feedback generation
+Future<FeedbackResult> getFeedback({
+  required Judge judge,
   required String cut,
   required String thickness,
   required String doneness,
   required String method,
 }) async {
-  final url = Uri.parse('https://api.openai.com/v1/chat/completions');
-
   final headers = {
-    'Content-Type': 'application/json',
-    'Authorization': 'Bearer $apiKey',
+    "Content-Type": "application/json",
+    "Authorization": "Bearer $apiKey",
   };
 
-  final body = jsonEncode({
-    "model": "gpt-4o-mini",
-    "messages": [
-      {
-        "role": "user",
-        "content":
-            """
-Judge:
-$judge
+  final safeJudgeJson = jsonEncode({
+    "name": judge.name,
+    "age": judge.age,
+    "profession": judge.profession,
+    "fat_pref": judge.fatPref,
+    "tenderness_pref": judge.tendernessPref,
+    "crust_pref": judge.crustPref,
+    "doneness_pref": judge.donenessPref,
+    "personality": judge.personality,
+  });
+
+  final prompt =
+      """
+Judge profile (JSON, SAFE PARSED):
+$safeJudgeJson
+
+ALLOWED STEAK CHOICES (for evaluation):
+Cuts: fillet, ribeye, sirloin, rump, t-bone
+Thickness (cm): 1.5, 2, 3, 4, 5
+Doneness: rare, medium rare, medium, medium well, well done
+Methods: pan sear, grilling, reverse sear, broiling, sous vide
 
 User choices:
 Cut: $cut
 Thickness: $thickness
 Doneness: $doneness
-Cooking Method: $method
+Method: $method
 
-Return ONLY JSON:
+Evaluate ONLY using allowed values.
+If a user choice is outside these lists, punish score fairly.
+
+Return STRICT JSON:
 {
-  "score": ...,
-  "explanation": "...",
-  "tip": "..."
+  "score": 0,
+  "thoughts": "",
+  "feedback": "",
+  "tip": ""
 }
-""",
-      },
+
+RULES:
+- JSON ONLY (no explanations).
+- SCORE MUST be integer 0 - 100.
+- All fields must be MAX 20 words.
+- DO NOT reveal ideal answer.
+- DO NOT reveal judge preferences directly.
+""";
+
+  final body = jsonEncode({
+    "model": "gpt-4o-mini",
+    "messages": [
+      {"role": "user", "content": prompt},
     ],
     "temperature": 0.7,
   });
 
-  final response = await http.post(url, headers: headers, body: body);
+  final response = await http.post(
+    Uri.parse(_url),
+    headers: headers,
+    body: body,
+  );
 
-  if (response.statusCode == 200) {
-    final data = jsonDecode(response.body);
-    return data["choices"][0]["message"]["content"].trim();
-  } else {
-    throw Exception('Failed to fetch feedback');
+  if (response.statusCode != 200) {
+    throw Exception("Failed to fetch feedback");
   }
+
+  final data = jsonDecode(response.body);
+  final content = data["choices"][0]["message"]["content"];
+
+  final jsonMap = jsonDecode(content);
+
+  return FeedbackResult.fromJson(jsonMap);
 }
