@@ -5,44 +5,64 @@ import 'package:shared_preferences/shared_preferences.dart';
 // enums below (we got to refactor and separate files later)
 
 enum Cut { fillet, ribeye, sirloin, rump, salad }
+
 enum Thickness { thin, standard, thick }
+
 enum Doneness { rare, mediumRare, medium, mediumWell, wellDone }
 
 String labelCut(Cut c) {
   switch (c) {
-    case Cut.fillet: return 'Fillet';
-    case Cut.ribeye: return 'Ribeye';
-    case Cut.sirloin: return 'Sirloin';
-    case Cut.rump: return 'Rump';
-    case Cut.salad: return 'Salad';
+    case Cut.fillet:
+      return 'Fillet';
+    case Cut.ribeye:
+      return 'Ribeye';
+    case Cut.sirloin:
+      return 'Sirloin';
+    case Cut.rump:
+      return 'Rump';
+    case Cut.salad:
+      return 'Salad';
   }
 }
 
 String labelThickness(Thickness t) {
   switch (t) {
-    case Thickness.thin: return 'Thin (~2 cm)';
-    case Thickness.standard: return 'Standard (~3 cm)';
-    case Thickness.thick: return 'Thick (4+ cm)';
+    case Thickness.thin:
+      return 'Thin (~2 cm)';
+    case Thickness.standard:
+      return 'Standard (~3 cm)';
+    case Thickness.thick:
+      return 'Thick (4+ cm)';
   }
 }
 
 String labelDoneness(Doneness d) {
   switch (d) {
-    case Doneness.rare: return 'Rare';
-    case Doneness.mediumRare: return 'Medium Rare';
-    case Doneness.medium: return 'Medium';
-    case Doneness.mediumWell: return 'Medium Well';
-    case Doneness.wellDone: return 'Well Done';
+    case Doneness.rare:
+      return 'Rare';
+    case Doneness.mediumRare:
+      return 'Medium Rare';
+    case Doneness.medium:
+      return 'Medium';
+    case Doneness.mediumWell:
+      return 'Medium Well';
+    case Doneness.wellDone:
+      return 'Well Done';
   }
 }
 
 String assetForCut(Cut c) {
   switch (c) {
-    case Cut.fillet: return 'assets/fillet.png';
-    case Cut.ribeye: return 'assets/ribeye.png';
-    case Cut.sirloin: return 'assets/sirloin.png';
-    case Cut.rump: return 'assets/rump.jpg';
-    case Cut.salad: return 'assets/salad.png';
+    case Cut.fillet:
+      return 'assets/fillet.png';
+    case Cut.ribeye:
+      return 'assets/ribeye.png';
+    case Cut.sirloin:
+      return 'assets/sirloin.png';
+    case Cut.rump:
+      return 'assets/rump.jpg';
+    case Cut.salad:
+      return 'assets/salad.png';
   }
 }
 
@@ -93,7 +113,8 @@ class JudgeResult {
 
 class ScoreEngine {
   double cutScore(Cut picked, Cut preferred) => picked == preferred ? 10 : 5;
-  double thicknessScore(Thickness picked, Thickness preferred) => picked == preferred ? 10 : 5;
+  double thicknessScore(Thickness picked, Thickness preferred) =>
+      picked == preferred ? 10 : 5;
 
   double donenessScore(Doneness picked, Doneness preferred) {
     final i = Doneness.values.indexOf(picked);
@@ -138,8 +159,7 @@ class GameState {
     JudgeProfile(
       name: 'Lucas',
       level: 'Technique judge',
-      bio:
-          'Obsessed with sear quality. Loves sirloins at medium well.',
+      bio: 'Obsessed with sear quality. Loves sirloins at medium well.',
       portraitAsset: 'assets/judge3.png',
       portraitAlign: Alignment(0, -0.35),
       preferredCut: Cut.sirloin,
@@ -185,11 +205,13 @@ class BoardBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(children: [
-      Image.asset('assets/cutting_board.png', fit: BoxFit.cover),
-      Container(color: Colors.black.withOpacity(0.12)),
-      SafeArea(child: child)
-    ]);
+    return Stack(
+      children: [
+        Image.asset('assets/cutting_board.png', fit: BoxFit.cover),
+        Container(color: Colors.black.withOpacity(0.12)),
+        SafeArea(child: child),
+      ],
+    );
   }
 }
 
@@ -211,7 +233,10 @@ class LabelChip extends StatelessWidget {
           color: selected ? Colors.brown.shade700 : Colors.brown.shade300,
         ),
       ),
-      child: Text(text, style: TextStyle(fontWeight: FontWeight.bold, color: fg)),
+      child: Text(
+        text,
+        style: TextStyle(fontWeight: FontWeight.bold, color: fg),
+      ),
     );
   }
 }
@@ -240,7 +265,10 @@ class JudgeBriefScreen extends StatelessWidget {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            Text('${j.name} • ${j.level}', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+            Text(
+              '${j.name} • ${j.level}',
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 12),
             Text(j.bio, style: const TextStyle(fontSize: 16)),
             const SizedBox(height: 22),
@@ -249,7 +277,10 @@ class JudgeBriefScreen extends StatelessWidget {
                 Navigator.pushNamed(
                   context,
                   '/judge_cut',
-                  arguments: CutFlowArgs(state: state, selection: JudgeSelection()),
+                  arguments: CutFlowArgs(
+                    state: state,
+                    selection: JudgeSelection(),
+                  ),
                 );
               },
               child: const Text("I remember — let's cook"),
@@ -264,7 +295,11 @@ class JudgeBriefScreen extends StatelessWidget {
 class CutPickScreen extends StatefulWidget {
   final GameState state;
   final JudgeSelection selection;
-  const CutPickScreen({super.key, required this.state, required this.selection});
+  const CutPickScreen({
+    super.key,
+    required this.state,
+    required this.selection,
+  });
 
   @override
   State<CutPickScreen> createState() => _CutPickScreenState();
@@ -347,7 +382,11 @@ class _CutCard extends StatelessWidget {
   final bool selected;
   final VoidCallback onTap;
 
-  const _CutCard({required this.cut, required this.selected, required this.onTap});
+  const _CutCard({
+    required this.cut,
+    required this.selected,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -362,7 +401,9 @@ class _CutCard extends StatelessWidget {
             padding: const EdgeInsets.all(8),
             child: Column(
               children: [
-                Expanded(child: Image.asset(assetForCut(cut), fit: BoxFit.cover)),
+                Expanded(
+                  child: Image.asset(assetForCut(cut), fit: BoxFit.cover),
+                ),
                 const SizedBox(height: 8),
                 LabelChip(labelCut(cut), selected: selected),
               ],
@@ -377,7 +418,11 @@ class _CutCard extends StatelessWidget {
 class ThicknessPickScreen extends StatefulWidget {
   final GameState state;
   final JudgeSelection selection;
-  const ThicknessPickScreen({super.key, required this.state, required this.selection});
+  const ThicknessPickScreen({
+    super.key,
+    required this.state,
+    required this.selection,
+  });
 
   @override
   State<ThicknessPickScreen> createState() => _ThicknessPickScreenState();
@@ -469,8 +514,9 @@ class _ThicknessCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final borderColor =
-        selected ? Colors.brown.shade700 : Colors.brown.withOpacity(0.35);
+    final borderColor = selected
+        ? Colors.brown.shade700
+        : Colors.brown.withOpacity(0.35);
 
     return Material(
       color: const Color(0xFFFFF7E6),
@@ -483,7 +529,11 @@ class _ThicknessCard extends StatelessWidget {
             padding: const EdgeInsets.all(14),
             child: Row(
               children: [
-                Container(height: barHeight, width: 60, color: Colors.brown.shade300),
+                Container(
+                  height: barHeight,
+                  width: 60,
+                  color: Colors.brown.shade300,
+                ),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Column(
@@ -506,7 +556,11 @@ class _ThicknessCard extends StatelessWidget {
 class DonenessPickScreen extends StatefulWidget {
   final GameState state;
   final JudgeSelection selection;
-  const DonenessPickScreen({super.key, required this.state, required this.selection});
+  const DonenessPickScreen({
+    super.key,
+    required this.state,
+    required this.selection,
+  });
 
   @override
   State<DonenessPickScreen> createState() => _DonenessPickScreenState();
@@ -518,7 +572,9 @@ class _DonenessPickScreenState extends State<DonenessPickScreen> {
   @override
   void initState() {
     super.initState();
-    _index = Doneness.values.indexOf(widget.selection.doneness ?? Doneness.mediumRare);
+    _index = Doneness.values.indexOf(
+      widget.selection.doneness ?? Doneness.mediumRare,
+    );
   }
 
   void _serve() {
@@ -535,9 +591,17 @@ class _DonenessPickScreenState extends State<DonenessPickScreen> {
           widget.state.submit(widget.selection);
 
           if (widget.state.isFinished) {
-            Navigator.pushReplacementNamed(context, '/judge_summary', arguments: widget.state);
+            Navigator.pushReplacementNamed(
+              context,
+              '/judge_summary',
+              arguments: widget.state,
+            );
           } else {
-            Navigator.pushReplacementNamed(context, '/judge_brief', arguments: widget.state);
+            Navigator.pushReplacementNamed(
+              context,
+              '/judge_brief',
+              arguments: widget.state,
+            );
           }
         },
       ),
@@ -618,7 +682,10 @@ class _DonenessCard extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(text, style: TextStyle(color: fg, fontWeight: FontWeight.w700)),
+              Text(
+                text,
+                style: TextStyle(color: fg, fontWeight: FontWeight.w700),
+              ),
               if (selected) Icon(Icons.check, color: fg),
             ],
           ),
@@ -637,14 +704,41 @@ class SummaryScreen extends StatelessWidget {
     final avg = state.averageScore;
 
     if (total >= 85) {
-      Navigator.pushReplacementNamed(context, '/judge_ending',
-          arguments: EndingArgs('assets/ending_michelin.jpg', 'Michelin Moment!', 'You impressed everyone!', total, avg));
+      Navigator.pushReplacementNamed(
+        context,
+        '/judge_ending',
+        arguments: EndingArgs(
+          'assets/ending_michelin.jpg',
+          'Michelin Moment!',
+          'You impressed everyone!',
+          total,
+          avg,
+        ),
+      );
     } else if (total >= 75) {
-      Navigator.pushReplacementNamed(context, '/judge_ending',
-          arguments: EndingArgs('assets/ending_tripadvisor.jpg', 'Tripadvisor Approved!', 'Great job!', total, avg));
+      Navigator.pushReplacementNamed(
+        context,
+        '/judge_ending',
+        arguments: EndingArgs(
+          'assets/ending_tripadvisor.jpg',
+          'Tripadvisor Approved!',
+          'Great job!',
+          total,
+          avg,
+        ),
+      );
     } else {
-      Navigator.pushReplacementNamed(context, '/judge_ending',
-          arguments: EndingArgs('assets/ending_empty.jpg', 'Room to Improve', 'Try again for a perfect steak.', total, avg));
+      Navigator.pushReplacementNamed(
+        context,
+        '/judge_ending',
+        arguments: EndingArgs(
+          'assets/ending_empty.jpg',
+          'Room to Improve',
+          'Try again for a perfect steak.',
+          total,
+          avg,
+        ),
+      );
     }
   }
 
@@ -689,7 +783,10 @@ class _ResultCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(j.name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
+            Text(
+              j.name,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+            ),
             const SizedBox(height: 6),
             Text('Cut: ${labelCut(s.cut!)}'),
             Text('Thickness: ${labelThickness(s.thickness!)}'),
@@ -710,7 +807,14 @@ class EndingScreen extends StatelessWidget {
   final double total;
   final double avg;
 
-  const EndingScreen({super.key, required this.img, required this.title, required this.msg, required this.total, required this.avg});
+  const EndingScreen({
+    super.key,
+    required this.img,
+    required this.title,
+    required this.msg,
+    required this.total,
+    required this.avg,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -722,7 +826,12 @@ class EndingScreen extends StatelessWidget {
       ),
       body: Stack(
         children: [
-          Image.asset(img, fit: BoxFit.cover, width: double.infinity, height: double.infinity),
+          Image.asset(
+            img,
+            fit: BoxFit.cover,
+            width: double.infinity,
+            height: double.infinity,
+          ),
           Container(color: Colors.black.withOpacity(0.35)),
           Center(
             child: Container(
@@ -735,7 +844,13 @@ class EndingScreen extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(title, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900)),
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
                   const SizedBox(height: 8),
                   Text(msg),
                   const SizedBox(height: 16),
@@ -743,7 +858,10 @@ class EndingScreen extends StatelessWidget {
                   Text('Avg: ${avg.toStringAsFixed(1)}'),
                   const SizedBox(height: 16),
                   FilledButton(
-                    onPressed: () => Navigator.popUntil(context, ModalRoute.withName('/home')),
+                    onPressed: () => Navigator.popUntil(
+                      context,
+                      ModalRoute.withName('/home'),
+                    ),
                     child: const Text('Play Again'),
                   ),
                 ],
@@ -801,32 +919,48 @@ class _ServeJudgeAnimationState extends State<ServeJudgeAnimation>
       ),
     );
 
-    _plateTilt = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween(begin: -0.03, end: 0.0), weight: 35),
-      TweenSequenceItem(tween: Tween(begin: 0.0, end: 0.03), weight: 15),
-      TweenSequenceItem(tween: Tween(begin: 0.03, end: 0.0), weight: 20),
-    ]).animate(
-      CurvedAnimation(
-        parent: _c,
-        curve: const Interval(0.30, 0.80, curve: Curves.easeInOut),
-      ),
-    );
+    _plateTilt =
+        TweenSequence<double>([
+          TweenSequenceItem(tween: Tween(begin: -0.03, end: 0.0), weight: 35),
+          TweenSequenceItem(tween: Tween(begin: 0.0, end: 0.03), weight: 15),
+          TweenSequenceItem(tween: Tween(begin: 0.03, end: 0.0), weight: 20),
+        ]).animate(
+          CurvedAnimation(
+            parent: _c,
+            curve: const Interval(0.30, 0.80, curve: Curves.easeInOut),
+          ),
+        );
 
     Animation<double> rise(double start, double end) =>
         Tween<double>(begin: 0.0, end: 1.0).animate(
-          CurvedAnimation(parent: _c, curve: Interval(start, end, curve: Curves.easeOut)),
+          CurvedAnimation(
+            parent: _c,
+            curve: Interval(start, end, curve: Curves.easeOut),
+          ),
         );
 
     Animation<double> drift(double start, double end) =>
         Tween<double>(begin: -1.0, end: 1.0).animate(
-          CurvedAnimation(parent: _c, curve: Interval(start, end, curve: Curves.easeInOut)),
+          CurvedAnimation(
+            parent: _c,
+            curve: Interval(start, end, curve: Curves.easeInOut),
+          ),
         );
 
     _steamRise = [rise(0.30, 0.90), rise(0.38, 0.98), rise(0.46, 1.00)];
     _steamFade = [
-      CurvedAnimation(parent: _c, curve: const Interval(0.30, 0.90, curve: Curves.easeInOut)),
-      CurvedAnimation(parent: _c, curve: const Interval(0.38, 0.98, curve: Curves.easeInOut)),
-      CurvedAnimation(parent: _c, curve: const Interval(0.46, 1.00, curve: Curves.easeInOut)),
+      CurvedAnimation(
+        parent: _c,
+        curve: const Interval(0.30, 0.90, curve: Curves.easeInOut),
+      ),
+      CurvedAnimation(
+        parent: _c,
+        curve: const Interval(0.38, 0.98, curve: Curves.easeInOut),
+      ),
+      CurvedAnimation(
+        parent: _c,
+        curve: const Interval(0.46, 1.00, curve: Curves.easeInOut),
+      ),
     ];
     _steamDrift = [drift(0.30, 0.90), drift(0.38, 0.98), drift(0.46, 1.00)];
 
@@ -910,7 +1044,13 @@ class _PlateWidget extends StatelessWidget {
             color: Colors.white,
             shape: BoxShape.circle,
             border: Border.all(color: Colors.brown.shade200, width: 6),
-            boxShadow: const [BoxShadow(blurRadius: 12, color: Colors.black12, offset: Offset(0, 6))],
+            boxShadow: const [
+              BoxShadow(
+                blurRadius: 12,
+                color: Colors.black12,
+                offset: Offset(0, 6),
+              ),
+            ],
           ),
         ),
         Container(
