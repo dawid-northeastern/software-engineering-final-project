@@ -25,7 +25,9 @@ class ModuleInfo {
 }
 
 class ModulesScreen extends StatefulWidget {
-  const ModulesScreen({super.key});
+  final VoidCallback? onCompleteAll;
+
+  const ModulesScreen({super.key, this.onCompleteAll});
 
   @override
   State<ModulesScreen> createState() => _ModulesScreenState();
@@ -165,6 +167,9 @@ class _ModulesScreenState extends State<ModulesScreen> {
                               setState(() {
                                 cuts.status = ModuleStatus.completed;
                               });
+                              if (_completedCount == modules.length) {
+                                widget.onCompleteAll?.call();
+                              }
                             },
                           ),
                         ),
@@ -194,6 +199,9 @@ class _ModulesScreenState extends State<ModulesScreen> {
                               setState(() {
                                 thickness.status = ModuleStatus.completed;
                               });
+                              if (_completedCount == modules.length) {
+                                widget.onCompleteAll?.call();
+                              }
                             },
                           ),
                         ),
@@ -223,6 +231,9 @@ class _ModulesScreenState extends State<ModulesScreen> {
                               setState(() {
                                 doneness.status = ModuleStatus.completed;
                               });
+                              if (_completedCount == modules.length) {
+                                widget.onCompleteAll?.call();
+                              }
                             },
                           ),
                         ),
@@ -252,6 +263,9 @@ class _ModulesScreenState extends State<ModulesScreen> {
                               setState(() {
                                 cooking.status = ModuleStatus.completed;
                               });
+                              if (_completedCount == modules.length) {
+                                widget.onCompleteAll?.call();
+                              }
                             },
                           ),
                         ),
@@ -268,26 +282,26 @@ class _ModulesScreenState extends State<ModulesScreen> {
                     child: Text(cooking.title),
                   ),
                   const SizedBox(height: 16),
-                  //if (allCompleted) // commented out for testing
-                  FilledButton(
-                    onPressed: () {
-                      Navigator.pushNamed(
-                        context,
-                        '/judge_brief',
-                        arguments:
-                            GameState(), // i passed the game state as an argument here but we need to fix the state managemtent for sure
-                      );
-                    },
-                    style: FilledButton.styleFrom(
-                      backgroundColor: const Color.fromARGB(255, 81, 57, 48),
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                  if (allCompleted) // commented out for testing
+                    FilledButton(
+                      onPressed: () {
+                        Navigator.pushNamed(
+                          context,
+                          '/judge_brief',
+                          arguments:
+                              GameState(), // i passed the game state as an argument here but we need to fix the state managemtent for sure
+                        );
+                      },
+                      style: FilledButton.styleFrom(
+                        backgroundColor: const Color.fromARGB(255, 81, 57, 48),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
+                      child: const Text('Continue to app'),
                     ),
-                    child: const Text('Continue to app'),
-                  ),
                   const Spacer(),
                 ],
               ),

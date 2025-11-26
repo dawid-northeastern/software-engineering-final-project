@@ -50,12 +50,6 @@ class _ModuleScreenState extends State<ModuleScreen> {
     });
   }
 
-  void _skip() {
-    // temporary skip action for testing: mark complete and close
-    widget.onComplete();
-    Navigator.pop(context);
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -113,10 +107,6 @@ class _ModuleScreenState extends State<ModuleScreen> {
                               child: const Text('Next'),
                             ),
                             const SizedBox(width: 8),
-                            TextButton(
-                              onPressed: _skip,
-                              child: const Text('Skip'),
-                            ),
                           ],
                         ),
                       ],
@@ -147,11 +137,7 @@ class _ModuleScreenState extends State<ModuleScreen> {
                           )
                         else
                           const SizedBox.shrink(),
-                        // temporary skip option on final screen as well
-                        TextButton(
-                          onPressed: _skip,
-                          child: const Text('Skip Module'),
-                        ),
+                        const SizedBox.shrink(),
                       ],
                     ),
                 ],
