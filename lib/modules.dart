@@ -72,8 +72,8 @@ class _ModulesScreenState extends State<ModulesScreen> {
           'assets/rump.jpg',
         ],
         questionText:
-            'Option A: Fillet is the most tender cut but usually has a milder flavour.\n'
-            'Option B: Ribeye is the leanest cut with almost no fat.\n'
+            'Option A: Fillet is the most tender cut but usually has a milder flavour.\n\n'
+            'Option B: Ribeye is the leanest cut with almost no fat.\n\n'
             'Option C: Rump is softer and more tender than fillet.\n\n'
             'Which statement about steak cuts is correct?',
       ),
@@ -102,8 +102,8 @@ class _ModulesScreenState extends State<ModulesScreen> {
           'assets/fillet.png',
         ],
         questionText:
-            'Option A: Around 2–2.5 cm is a good thickness for control, and thicker steaks need adjusted cooking time.\n'
-            'Option B: Thin 1 cm steaks are easiest because you never need to adjust timing.\n'
+            'Option A: Around 2–2.5 cm is a good thickness for control, and thicker steaks need adjusted cooking time.\n\n'
+            'Option B: Thin 1 cm steaks are easiest because you never need to adjust timing.\n\n'
             'Option C: Thickness doesn’t affect how you cook a steak.\n\n'
             'Which statement about steak thickness is correct?',
       ),
@@ -137,8 +137,8 @@ class _ModulesScreenState extends State<ModulesScreen> {
           'assets/rump.jpg',
         ],
         questionText:
-            'Option A: Medium-rare steak has a warm red centre and stays very juicy.\n'
-            'Option B: Well-done steak is the juiciest because it is cooked the longest.\n'
+            'Option A: Medium-rare steak has a warm red centre and stays very juicy.\n\n'
+            'Option B: Well-done steak is the juiciest because it is cooked the longest.\n\n'
             'Option C: Rare steak has no red in the centre.\n\n'
             'Which statement about doneness is correct?',
       ),
@@ -172,8 +172,8 @@ class _ModulesScreenState extends State<ModulesScreen> {
           'assets/steak_resting.jpg',
         ],
         questionText:
-            'Option A: Use a very hot heavy pan, don’t overcrowd, oil the steak, season well, turn regularly and rest before serving.\n'
-            'Option B: Put many cold steaks into a medium pan so they slowly steam.\n'
+            'Option A: Use a very hot heavy pan, don’t overcrowd, oil the steak, season well, turn regularly and rest before serving.\n\n'
+            'Option B: Put many cold steaks into a medium pan so they slowly steam.\n\n'
             'Option C: Skip resting to keep all the heat in the pan.\n\n'
             'Which approach to searing and cooking is correct?',
       ),
@@ -196,6 +196,38 @@ class _ModulesScreenState extends State<ModulesScreen> {
       return Colors.brown.shade300; // lighter when done
     }
     return Colors.brown;
+  }
+
+  void _openModule(ModuleInfo module) {
+    if (module.isCompleted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${module.title} is already completed.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ModuleScreen(
+          title: module.title,
+          slideTexts: module.slideTexts,
+          slideImages: module.slideImages,
+          questionText: module.questionText,
+          onComplete: () {
+            setState(() {
+              module.status = ModuleStatus.completed;
+            });
+            if (_completedCount == modules.length) {
+              widget.onCompleteAll?.call();
+            }
+          },
+        ),
+      ),
+    );
   }
 
   @override
@@ -254,27 +286,7 @@ class _ModulesScreenState extends State<ModulesScreen> {
                   ),
                   const SizedBox(height: 20),
                   FilledButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => ModuleScreen(
-                            title: cuts.title,
-                            slideTexts: cuts.slideTexts,
-                            slideImages: cuts.slideImages,
-                            questionText: cuts.questionText,
-                            onComplete: () {
-                              setState(() {
-                                cuts.status = ModuleStatus.completed;
-                              });
-                              if (_completedCount == modules.length) {
-                                widget.onCompleteAll?.call();
-                              }
-                            },
-                          ),
-                        ),
-                      );
-                    },
+                    onPressed: () => _openModule(cuts),
                     style: FilledButton.styleFrom(
                       backgroundColor: _buttonColor(cuts),
                       foregroundColor: Colors.white,
@@ -287,27 +299,7 @@ class _ModulesScreenState extends State<ModulesScreen> {
                   ),
                   const SizedBox(height: 12),
                   FilledButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => ModuleScreen(
-                            title: thickness.title,
-                            slideTexts: thickness.slideTexts,
-                            slideImages: thickness.slideImages,
-                            questionText: thickness.questionText,
-                            onComplete: () {
-                              setState(() {
-                                thickness.status = ModuleStatus.completed;
-                              });
-                              if (_completedCount == modules.length) {
-                                widget.onCompleteAll?.call();
-                              }
-                            },
-                          ),
-                        ),
-                      );
-                    },
+                    onPressed: () => _openModule(thickness),
                     style: FilledButton.styleFrom(
                       backgroundColor: _buttonColor(thickness),
                       foregroundColor: Colors.white,
@@ -320,27 +312,7 @@ class _ModulesScreenState extends State<ModulesScreen> {
                   ),
                   const SizedBox(height: 12),
                   FilledButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => ModuleScreen(
-                            title: doneness.title,
-                            slideTexts: doneness.slideTexts,
-                            slideImages: doneness.slideImages,
-                            questionText: doneness.questionText,
-                            onComplete: () {
-                              setState(() {
-                                doneness.status = ModuleStatus.completed;
-                              });
-                              if (_completedCount == modules.length) {
-                                widget.onCompleteAll?.call();
-                              }
-                            },
-                          ),
-                        ),
-                      );
-                    },
+                    onPressed: () => _openModule(doneness),
                     style: FilledButton.styleFrom(
                       backgroundColor: _buttonColor(doneness),
                       foregroundColor: Colors.white,
@@ -353,27 +325,7 @@ class _ModulesScreenState extends State<ModulesScreen> {
                   ),
                   const SizedBox(height: 12),
                   FilledButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => ModuleScreen(
-                            title: cooking.title,
-                            slideTexts: cooking.slideTexts,
-                            slideImages: cooking.slideImages,
-                            questionText: cooking.questionText,
-                            onComplete: () {
-                              setState(() {
-                                cooking.status = ModuleStatus.completed;
-                              });
-                              if (_completedCount == modules.length) {
-                                widget.onCompleteAll?.call();
-                              }
-                            },
-                          ),
-                        ),
-                      );
-                    },
+                    onPressed: () => _openModule(cooking),
                     style: FilledButton.styleFrom(
                       backgroundColor: _buttonColor(cooking),
                       foregroundColor: Colors.white,

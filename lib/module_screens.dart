@@ -44,8 +44,13 @@ class _ModuleScreenState extends State<ModuleScreen> {
 
   void _answer(bool correct) {
     setState(() {
-      feedback = correct ? 'Correct! 🎯' : 'Not quite – review the slides and try again.';
+      feedback = correct
+          ? 'Correct! 🎯' : 'Not quite – review the slides and try again.';
     });
+
+    if (!correct) {
+      Navigator.of(context).pop();
+    }
   }
 
   @override
@@ -231,7 +236,7 @@ class _ModuleScreenState extends State<ModuleScreen> {
           ),
           const SizedBox(height: 16),
           FilledButton(
-            onPressed: () => _answer(true), // Option A is correct
+            onPressed: () => _answer(true),
             child: const Text('Option A'),
           ),
           const SizedBox(height: 8),
