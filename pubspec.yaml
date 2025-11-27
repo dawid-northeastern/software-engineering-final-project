@@ -66,10 +66,12 @@ flutter:
     - assets/cow_fillet.png
     - assets/cow_ribeye.png
     - assets/cow_sirloin.png
+    - assets/hot_pan.jpg
     - assets/fillet.png
     - assets/ribeye.png
     - assets/sirloin.png
     - assets/rump.jpg
+    - assets/steak_resting.jpg
     - assets/kitchen.jpg
     - assets/ending_michelin.jpg
     - assets/ending_empty.jpg

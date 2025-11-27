@@ -220,6 +220,7 @@ class BoardBackground extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Stack(
+      fit: StackFit.expand,
       children: [
         Image.asset('assets/cutting_board.png', fit: BoxFit.cover),
         Container(color: Colors.black.withOpacity(0.12)),
@@ -872,9 +873,8 @@ class EndingScreen extends StatelessWidget {
                   Text('Avg: ${avg.toStringAsFixed(1)}'),
                   const SizedBox(height: 16),
                   FilledButton(
-                    onPressed: () => Navigator.popUntil(
-                      context,
-                      ModalRoute.withName('/home'),
+                    onPressed: () => Navigator.of(context).popUntil(
+                      (route) => route.isFirst,
                     ),
                     child: const Text('Play Again'),
                   ),
