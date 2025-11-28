@@ -71,6 +71,8 @@ class SteakMasterApp extends StatelessWidget {
             msg: a.msg,
             total: a.total,
             avg: a.avg,
+            state: a
+                .state, // NEW - adding final game state (XP, erros) to the ending screen
           );
         },
       },

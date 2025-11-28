@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'progress_manager.dart'; // NEW - game state managmenet is updated on each decision and gives final result
+import 'ai_service.dart'; // NEW - added the ai_serivce to the feedback from the 'judges'
 
 // enums below (we got to refactor and separate files later)
 
@@ -116,37 +118,15 @@ class JudgeSelection {
 class JudgeResult {
   final JudgeProfile judge;
   final JudgeSelection selection;
-  final double score;
 
-  const JudgeResult({
-    required this.judge,
-    required this.selection,
-    required this.score,
-  });
+  // Changed the game state managment system so that is not needed anymore
+  const JudgeResult({required this.judge, required this.selection});
 }
 
-class ScoreEngine {
-  double cutScore(Cut picked, Cut preferred) => picked == preferred ? 10 : 5;
-  double thicknessScore(Thickness picked, Thickness preferred) =>
-      picked == preferred ? 10 : 5;
-
-  double donenessScore(Doneness picked, Doneness preferred) {
-    final i = Doneness.values.indexOf(picked);
-    final j = Doneness.values.indexOf(preferred);
-    final steps = (i - j).abs();
-    final score = 10 - 2.5 * steps;
-    return score < 0 ? 0 : score;
-  }
-
-  double total(JudgeSelection s, JudgeProfile j) {
-    return cutScore(s.cut!, j.preferredCut) +
-        thicknessScore(s.thickness!, j.preferredThickness) +
-        donenessScore(s.doneness!, j.preferredDoneness);
-  }
-}
-
+// NEW - improved the game state management system that is based on both the training part
+// and the 'judges game' part, it's throughout the whole learning and the whole app
+// The final results and if the game was completed successfuly is based on that state managment
 class GameState {
-  final ScoreEngine engine = ScoreEngine();
   final List<JudgeProfile> judges = const [
     JudgeProfile(
       name: 'Adam',
@@ -188,14 +168,66 @@ class GameState {
   JudgeProfile get current => judges[index];
   bool get isFinished => index >= judges.length;
 
-  void submit(JudgeSelection sel) {
-    final score = engine.total(sel, current);
-    results.add(JudgeResult(judge: current, selection: sel, score: score));
+  // submit function was extended to not just record the choice
+  // it calls _trackExperience which compares the player's selection against judge
+  // preferences, adjusts xp and errors in ProgresssManager and show snackbar (the
+  // notification on bottom of the screen that doesn't interrupt the game) for correct/incorrect
+  // It adds JudgeResult like previously and increments the index to move to the next judge
+  void submit(BuildContext context, JudgeSelection sel) {
+    _trackExperience(context, sel, current);
+    results.add(JudgeResult(judge: current, selection: sel));
     index++;
   }
 
-  double get totalScore => results.fold(0, (s, r) => s + r.score);
-  double get averageScore => totalScore / judges.length;
+  // _trackExperience compares player selection to judge prerefence
+  // it updates xp and errors based on it
+  // seperate points for each: thickness, cut, doneness
+  void _trackExperience(
+    BuildContext context,
+    JudgeSelection sel,
+    JudgeProfile j,
+  ) {
+    final pm = ProgressManager.instance;
+    if (sel.cut == j.preferredCut) {
+      pm.addCorrect();
+      _notify(context, true);
+    } else {
+      pm.addIncorrect();
+      _notify(context, false);
+    }
+
+    if (sel.thickness == j.preferredThickness) {
+      pm.addCorrect();
+      _notify(context, true);
+    } else {
+      pm.addIncorrect();
+      _notify(context, false);
+    }
+
+    if (sel.doneness == j.preferredDoneness) {
+      pm.addCorrect();
+      _notify(context, true);
+    } else {
+      pm.addIncorrect();
+      _notify(context, false);
+    }
+  }
+
+  // creates a simple notification (snackbar) for each decision
+  void _notify(BuildContext context, bool correct) {
+    final text = correct
+        ? 'Correct answer: +15 XP'
+        : 'Incorrect answer: -10 XP';
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(text), behavior: SnackBarBehavior.floating),
+    );
+  }
+
+  // restarts from first judge and clears the current results
+  void restart() {
+    results.clear();
+    index = 0;
+  }
 }
 
 class CutFlowArgs {
@@ -210,7 +242,9 @@ class EndingArgs {
   final String msg;
   final double total;
   final double avg;
-  EndingArgs(this.img, this.title, this.msg, this.total, this.avg);
+  final GameState
+  state; // NEW - now ending arguments have the state managment system essential for the app now
+  EndingArgs(this.img, this.title, this.msg, this.total, this.avg, this.state);
 }
 
 class BoardBackground extends StatelessWidget {
@@ -258,21 +292,88 @@ class LabelChip extends StatelessWidget {
 
 // different screens for judge game flow
 
-class JudgeBriefScreen extends StatelessWidget {
+// NEW - this is a Stateful widget now as it reacts to game state manaagmenet
+// and the current state (xp, errors)
+// It also allows to save/load/restart
+// It provides notification based on the user actions
+// Bascially, it rebuilds the game when state changes all based on 'GameState' instance which
+// holds those states
+class JudgeBriefScreen extends StatefulWidget {
   final GameState state;
   const JudgeBriefScreen({super.key, required this.state});
 
   @override
+  State<JudgeBriefScreen> createState() => _JudgeBriefScreenState();
+}
+
+class _JudgeBriefScreenState extends State<JudgeBriefScreen> {
+  // saves current judge index to Progessmanager,
+  // shows the snack bar (bar at the bottom of the screen which doesn't interrupt the game)
+  // setState refreshes the UI to avoid any inconsistancies
+  Future<void> _save() async {
+    await ProgressManager.instance.saveState(
+      completedModules: const [],
+      judgeIndex: widget.state.index,
+    );
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Progress saved'),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+    setState(() {});
+  }
+
+  // load clears existing results, and loads the saved game
+  Future<void> _load() async {
+    final result = await ProgressManager.instance.loadState();
+    widget.state.results.clear();
+    widget.state.index = (result.judgeIndex ?? 0).clamp(
+      0,
+      widget.state.judges.length,
+    );
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Progress loaded'),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+    setState(() {});
+  }
+
+  // completely restarts the game
+  Future<void> _restart() async {
+    await ProgressManager.instance.resetState();
+    widget.state.restart();
+    if (!mounted) return;
+    Navigator.of(context).popUntil((route) => route.isFirst);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    if (state.isFinished) {
-      return SummaryScreen(state: state);
+    // it's now widget.state.isFinished as state is not
+    // local anymore
+    // In a State class widgets are accessed via 'widget'
+    //
+    // GameState is passed into JudgeBriefScreen as widget.state
+    // and now it's passed here to check if it's finished
+    if (widget.state.isFinished) {
+      return SummaryScreen(state: widget.state);
     }
 
-    final j = state.current;
+    // j - gets the current judge profile from the GameState
+    // pm - gets the ProgressManager (a singleton pattern in that case) so the game state mananagmenet
+    //      can be rendered in the screen
+    final j = widget.state.current;
+    final pm = ProgressManager.instance;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Judge ${state.index + 1}'),
+        title: Text(
+          'Judge ${widget.state.index + 1}',
+        ), // NEW - had to change from state.index to widget.state.index based on the new structued (explained above)
         backgroundColor: Colors.brown.shade700,
         foregroundColor: Colors.white,
       ),
@@ -280,6 +381,67 @@ class JudgeBriefScreen extends StatelessWidget {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
+            // NEw - just added the new inforamtion to the game screen/UI
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _StatBadge(label: 'XP', value: pm.experience),
+                _StatBadge(label: 'Errors', value: pm.errors),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                FilledButton(
+                  onPressed: _save,
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Colors.brown,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 10,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Text('Save'),
+                ),
+                FilledButton(
+                  onPressed: _load,
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Colors.brown,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 10,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Text('Load'),
+                ),
+                FilledButton(
+                  onPressed: _restart,
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Colors.brown,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 10,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Text('Restart'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
             Text(
               '${j.name} • ${j.level}',
               style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
@@ -293,7 +455,8 @@ class JudgeBriefScreen extends StatelessWidget {
                   context,
                   '/judge_cut',
                   arguments: CutFlowArgs(
-                    state: state,
+                    state: widget
+                        .state, // NEW - again had to change from state to widget.state
                     selection: JudgeSelection(),
                   ),
                 );
@@ -333,6 +496,14 @@ class _CutPickScreenState extends State<CutPickScreen> {
     widget.selection.cut = _picked;
 
     if (_picked == Cut.salad) {
+      // Deals with the very wrong salad choice
+      ProgressManager.instance.addIncorrect();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Incorrect answer: -10 XP'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
       Navigator.pushReplacementNamed(
         context,
         '/judge_ending',
@@ -340,8 +511,9 @@ class _CutPickScreenState extends State<CutPickScreen> {
           'assets/ending_empty.jpg',
           '…Wait, Salad?',
           'The judges came for steak. You served salad.',
-          widget.state.totalScore,
-          widget.state.averageScore,
+          0, // NEW - there is not totalScore anymore based on new game state managmenet
+          0, // NEW - there is not avergageScore anymore based on new game state managmenet
+          widget.state, // NEW - there is now state for new game state managment
         ),
       );
       return;
@@ -592,8 +764,22 @@ class _DonenessPickScreenState extends State<DonenessPickScreen> {
     );
   }
 
-  void _serve() {
+  // this finalises the current judge 'round'
+  // stores choosen doneness into 'selection'
+  // the new code is here as doneness is the last part before evaluation
+  Future<void> _serve() async {
     widget.selection.doneness = Doneness.values[_index];
+
+    // scores the selections, updates progress, and go to next judge
+    widget.state.submit(context, widget.selection);
+
+    // Displau the judge (AI) feedback
+    await _showFeedback(context);
+
+    // go to final stage or go to next judge if there is one
+    final targetRoute = widget.state.isFinished
+        ? '/judge_summary'
+        : '/judge_brief';
 
     final overlay = Overlay.of(context);
     late OverlayEntry entry;
@@ -602,27 +788,87 @@ class _DonenessPickScreenState extends State<DonenessPickScreen> {
       builder: (_) => ServeJudgeAnimation(
         onCompleted: () {
           entry.remove();
-
-          widget.state.submit(widget.selection);
-
-          if (widget.state.isFinished) {
-            Navigator.pushReplacementNamed(
-              context,
-              '/judge_summary',
-              arguments: widget.state,
-            );
-          } else {
-            Navigator.pushReplacementNamed(
-              context,
-              '/judge_brief',
-              arguments: widget.state,
-            );
-          }
+          Navigator.pushReplacementNamed(
+            context,
+            targetRoute, // NEW - refactored based on new targetRoute which is run AFTER the judge (AI) feedback
+            arguments: widget.state,
+          );
         },
       ),
     );
 
     overlay.insert(entry);
+  }
+
+  // Imporant function that deals with judge (AI) feedback
+  Future<void> _showFeedback(BuildContext context) async {
+    try {
+      final judgeProfile = widget.state.current;
+      final judge = Judge(
+        name: judgeProfile.name,
+        age: 30, // for now hardcoded
+        profession: judgeProfile.level,
+        fatPref: labelCut(judgeProfile.preferredCut),
+        tendernessPref: labelThickness(judgeProfile.preferredThickness),
+        crustPref: 'Crusty sear', // for now hardcoded
+        donenessPref: labelDoneness(judgeProfile.preferredDoneness),
+        personality: 'picky but fair', // for now hardcoded
+      );
+
+      final feedback = await getFeedback(
+        judge: judge,
+        cut: labelCut(widget.selection.cut!),
+        thickness: labelThickness(widget.selection.thickness!),
+        doneness: labelDoneness(widget.selection.doneness!),
+        method: "Pan-Seared",
+      );
+
+      if (!mounted) return;
+      await showModalBottomSheet(
+        context: context,
+        backgroundColor: Colors.white,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+        ),
+        builder: (_) {
+          return Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Judge Feedback',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+                ),
+                const SizedBox(height: 10),
+                _FeedbackBulletPoints(
+                  title: 'Score',
+                  text: feedback.score.toString(),
+                ),
+                _FeedbackBulletPoints(
+                  title: 'Feedback',
+                  text: feedback.feedback,
+                ),
+                _FeedbackBulletPoints(
+                  title: 'Thoughts',
+                  text: feedback.thoughts,
+                ),
+                _FeedbackBulletPoints(title: 'Tips', text: feedback.tip),
+              ],
+            ),
+          );
+        },
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Could not fetch AI feedback right now.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 
   @override
@@ -715,46 +961,15 @@ class SummaryScreen extends StatelessWidget {
   const SummaryScreen({super.key, required this.state});
 
   void _finish(BuildContext context) {
-    final total = state.totalScore;
-    final avg = state.averageScore;
-
-    if (total >= 85) {
-      Navigator.pushReplacementNamed(
-        context,
-        '/judge_ending',
-        arguments: EndingArgs(
-          'assets/ending_michelin.jpg',
-          'Michelin Moment!',
-          'You impressed everyone!',
-          total,
-          avg,
-        ),
-      );
-    } else if (total >= 75) {
-      Navigator.pushReplacementNamed(
-        context,
-        '/judge_ending',
-        arguments: EndingArgs(
-          'assets/ending_tripadvisor.jpg',
-          'Tripadvisor Approved!',
-          'Great job!',
-          total,
-          avg,
-        ),
-      );
-    } else {
-      Navigator.pushReplacementNamed(
-        context,
-        '/judge_ending',
-        arguments: EndingArgs(
-          'assets/ending_empty.jpg',
-          'Room to Improve',
-          'Try again for a perfect steak.',
-          total,
-          avg,
-        ),
-      );
-    }
+    // NEW - check the new state management system and if ex > 50 and errors < 5 then game won
+    final pm = ProgressManager.instance;
+    final win = pm.experience > 50 && pm.errors < 5;
+    final img = win ? 'assets/ending_michelin.jpg' : 'assets/ending_empty.jpg';
+    Navigator.pushReplacementNamed(
+      context,
+      '/judge_ending',
+      arguments: EndingArgs(img, '', '', 0, 0, state),
+    );
   }
 
   @override
@@ -806,10 +1021,75 @@ class _ResultCard extends StatelessWidget {
             Text('Cut: ${labelCut(s.cut!)}'),
             Text('Thickness: ${labelThickness(s.thickness!)}'),
             Text('Doneness: ${labelDoneness(s.doneness!)}'),
-            const SizedBox(height: 6),
-            Text('Score: ${result.score.toStringAsFixed(1)}'),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// Rendering for the state management (XP and Error number)
+// used to display errors and xp in structured way
+class _StatBadge extends StatelessWidget {
+  final String label;
+  final int value;
+  const _StatBadge({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.92),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.brown.withOpacity(0.25)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            '$label: ',
+            style: TextStyle(
+              fontWeight: FontWeight.w700,
+              color: Colors.brown.shade800,
+            ),
+          ),
+          Text('$value', style: const TextStyle(fontWeight: FontWeight.w600)),
+        ],
+      ),
+    );
+  }
+}
+
+// Displaying AI feedback in structured bullet points for user clarity and experience
+class _FeedbackBulletPoints extends StatelessWidget {
+  final String title;
+  final String text;
+  const _FeedbackBulletPoints({required this.title, required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('• ', style: TextStyle(fontSize: 16)),
+          Expanded(
+            child: RichText(
+              text: TextSpan(
+                style: const TextStyle(color: Colors.black87, fontSize: 14.5),
+                children: [
+                  TextSpan(
+                    text: '$title: ',
+                    style: const TextStyle(fontWeight: FontWeight.w700),
+                  ),
+                  TextSpan(text: text),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -821,6 +1101,8 @@ class EndingScreen extends StatelessWidget {
   final String msg;
   final double total;
   final double avg;
+  final GameState
+  state; // NEW - need to new game staate management for the ending screen
 
   const EndingScreen({
     super.key,
@@ -829,10 +1111,19 @@ class EndingScreen extends StatelessWidget {
     required this.msg,
     required this.total,
     required this.avg,
+    required this.state, // NEW - for new game state management system
   });
 
   @override
   Widget build(BuildContext context) {
+    // NEW - gives how many ex more needed to win or how many errors less to win
+    final pm = ProgressManager.instance;
+    final xp = pm.experience;
+    final errs = pm.errors;
+    final bool win = xp > 50 && errs < 5;
+    final int xpShort = win ? 0 : (xp >= 50 ? 0 : 50 - xp);
+    final int errOver = win ? 0 : (errs <= 5 ? 0 : errs - 5);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Epilogue'),
@@ -859,23 +1150,38 @@ class EndingScreen extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  // NEW - changes to epilogue screen based on if won or not, resettng the game
                   Text(
-                    title,
+                    win ? 'You Win!' : 'Keep Training',
                     style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.w900,
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Text(msg),
+                  Text(
+                    win
+                        ? 'Great job! You reached the target with solid execution.'
+                        : _lossMessage(xpShort: xpShort, errOver: errOver),
+                    textAlign: TextAlign.center,
+                  ),
                   const SizedBox(height: 16),
-                  Text('Total: ${total.toStringAsFixed(1)}'),
-                  Text('Avg: ${avg.toStringAsFixed(1)}'),
+                  Text('Total XP: $xp', style: const TextStyle(fontSize: 16)),
+                  Text(
+                    'Total Errors: $errs',
+                    style: const TextStyle(fontSize: 16),
+                  ),
                   const SizedBox(height: 16),
                   FilledButton(
-                    onPressed: () => Navigator.of(context).popUntil(
-                      (route) => route.isFirst,
-                    ),
+                    onPressed: () async {
+                      await ProgressManager.instance.resetState();
+                      state.restart();
+                      if (context.mounted) {
+                        Navigator.of(
+                          context,
+                        ).popUntil((route) => route.isFirst);
+                      }
+                    },
                     child: const Text('Play Again'),
                   ),
                 ],
@@ -885,6 +1191,15 @@ class EndingScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  // Specific message on how many xp and errors needed to win
+  static String _lossMessage({required int xpShort, required int errOver}) {
+    final parts = <String>[];
+    if (xpShort > 0) parts.add('You need $xpShort more XP');
+    if (errOver > 0) parts.add('Reduce errors by $errOver');
+    if (parts.isEmpty) return 'Keep training to sharpen your skills.';
+    return parts.join(' • ');
   }
 }
 

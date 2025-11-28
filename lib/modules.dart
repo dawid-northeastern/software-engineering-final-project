@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'module_screens.dart';
 import 'judge_game_flow.dart';
+import 'progress_manager.dart'; // NEW - this is the file with state management
 
 enum ModuleStatus { notStarted, completed }
 
@@ -24,7 +25,6 @@ class ModuleInfo {
   bool get isCompleted => status == ModuleStatus.completed;
 }
 
-
 class ModulesScreen extends StatefulWidget {
   final VoidCallback? onCompleteAll;
 
@@ -41,7 +41,7 @@ class _ModulesScreenState extends State<ModulesScreen> {
   void initState() {
     super.initState();
     modules = [
-      // CUTS MODULE
+      // -------------------- CUTS MODULE--------------------
       ModuleInfo(
         id: 'cuts',
         title: 'Steak Cuts: The Basics',
@@ -78,7 +78,7 @@ class _ModulesScreenState extends State<ModulesScreen> {
             'Which statement about steak cuts is correct?',
       ),
 
-      // THICKNESS MODULE
+      // -------------------- THICKNESS MODULE--------------------
       ModuleInfo(
         id: 'thickness',
         title: 'Thickness & Control',
@@ -108,7 +108,7 @@ class _ModulesScreenState extends State<ModulesScreen> {
             'Which statement about steak thickness is correct?',
       ),
 
-      // DONENESS MODULE
+      // -------------------- DONENESS MODULE --------------------
       ModuleInfo(
         id: 'doneness',
         title: 'Doneness Levels',
@@ -131,7 +131,7 @@ class _ModulesScreenState extends State<ModulesScreen> {
               'Flavour and juiciness drop, so you need careful cooking to avoid dryness.',
         ],
         slideImages: [
-          'assets/doneness_chart.png', 
+          'assets/doneness_chart.png',
           'assets/fillet.png',
           'assets/ribeye.png',
           'assets/rump.jpg',
@@ -180,7 +180,6 @@ class _ModulesScreenState extends State<ModulesScreen> {
     ];
   }
 
-
   int get _completedCount {
     int count = 0;
     for (final m in modules) {
@@ -198,7 +197,12 @@ class _ModulesScreenState extends State<ModulesScreen> {
     return Colors.brown;
   }
 
-  void _openModule(ModuleInfo module) {
+  // Changes to Future becuase now it's an async (asynchronous)
+  // function whuch awaits the check to see if the module is completed
+  // If it is show the notification on the bottom of the screen (SnackBar)
+  // that doesn't interrupt the game but just informs the user
+  // Otherise it opens the module to learn
+  Future<void> _openModule(ModuleInfo module) async {
     if (module.isCompleted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -209,7 +213,20 @@ class _ModulesScreenState extends State<ModulesScreen> {
       return;
     }
 
-    Navigator.push(
+    // Pushed to navigator the learning module screen if the module was
+    // not completed
+    // Push (and pop) is useful for moving between the modules screen and the
+    // main 'Training' screen
+    // The module is on until it's popped which allows to review the slides again
+    // easily witout moving to the main screen
+    //
+    // onComplete is passed to mark the module as done when the user answer correctly
+    // If all modeuls are completed then it turns the onCompleteAll which allows to move
+    // to practical training and the judges game (AKA training completed)
+    //
+    // setState forces the main screen to pick up all the changes (shaded buttons of comleted modules
+    // and the progress text, update all the information corretly on the main screen)
+    await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => ModuleScreen(
@@ -228,6 +245,76 @@ class _ModulesScreenState extends State<ModulesScreen> {
         ),
       ),
     );
+    setState(() {});
+  }
+
+  // This function saves the game progress through shared preferences
+  // It's Future as it awaits the completition, meaning the correct
+  // time and state of the game saves, regardless if the user makes
+  // an action in the meantime
+  //
+  // Save gets all the completed module ids in a simple way
+  //
+  // Floating snack bar is a simple notification on the bottom of the screen
+  // that doesn't interrupt the game
+  Future<void> _saveProgress() async {
+    final pm = ProgressManager.instance;
+    final completedIds = modules
+        .where((m) => m.isCompleted)
+        .map((m) => m.id)
+        .toList();
+    await pm.saveState(completedModules: completedIds);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Progress saved'),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+    setState(() {});
+  }
+
+  // This function loads the save from previous funtion
+  // It loads it from SharedPreferences
+  // setState here updates each moduleinfo.status based on what was saved
+  Future<void> _loadProgress() async {
+    final pm = ProgressManager.instance;
+    final result = await pm.loadState();
+    setState(() {
+      for (final m in modules) {
+        m.status = result.completedModules.contains(m.id)
+            ? ModuleStatus.completed
+            : ModuleStatus.notStarted;
+      }
+    });
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Progress loaded'),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  // This resets all the game to originial and moves to main screen
+  // from the start
+  // It's a TOTAL reset - no saved games
+  // In the different function user is asked if user wish to continue
+  // which avoids accidental, annoying resets
+  Future<void> _resetProgress() async {
+    await ProgressManager.instance.resetState();
+    setState(() {
+      for (final m in modules) {
+        m.status = ModuleStatus.notStarted;
+      }
+    });
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Progress reset'),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
   }
 
   @override
@@ -235,6 +322,8 @@ class _ModulesScreenState extends State<ModulesScreen> {
     final total = modules.length;
     final done = _completedCount;
     final allCompleted = done == total && total > 0;
+    final pm = ProgressManager
+        .instance; // NEW - this gives access to state anagment (XP, error numbers)
 
     final cuts = modules[0];
     final thickness = modules[1];
@@ -270,6 +359,40 @@ class _ModulesScreenState extends State<ModulesScreen> {
                             fontSize: 22,
                             fontWeight: FontWeight.w700,
                           ),
+                        ),
+                        const SizedBox(height: 6),
+                        Row(
+                          children: [
+                            _StatBadge(label: 'XP', value: pm.experience),
+                            const SizedBox(width: 12),
+                            _StatBadge(label: 'Errors', value: pm.errors),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            OutlinedButton(
+                              onPressed: _saveProgress,
+                              child: const Text('Save'),
+                            ),
+                            OutlinedButton(
+                              onPressed: _loadProgress,
+                              child: const Text('Load'),
+                            ),
+                            OutlinedButton(
+                              child: const Text('Restart'),
+                              onPressed: () async {
+                                await ProgressManager.instance.resetState();
+                                if (context.mounted) {
+                                  Navigator.of(
+                                    context,
+                                  ).popUntil((route) => route.isFirst);
+                                }
+                              },
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 8),
                         const Text(
@@ -337,14 +460,14 @@ class _ModulesScreenState extends State<ModulesScreen> {
                     child: Text(cooking.title),
                   ),
                   const SizedBox(height: 16),
-                  if (allCompleted) // commented out for testing
+                  if (allCompleted)
                     FilledButton(
                       onPressed: () {
                         Navigator.pushNamed(
                           context,
                           '/judge_brief',
                           arguments:
-                              GameState(), // i passed the game state as an argument here but we need to fix the state managemtent for sure
+                              GameState(), // NEW - I think all good now with the game state managment and it can work like that
                         );
                       },
                       style: FilledButton.styleFrom(
@@ -362,6 +485,40 @@ class _ModulesScreenState extends State<ModulesScreen> {
               ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+// Rendering for the state management (XP and Error number)
+// used to display errors and xp in structured way
+class _StatBadge extends StatelessWidget {
+  final String label;
+  final int value;
+
+  const _StatBadge({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.92),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.brown.withOpacity(0.25)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            '$label: ',
+            style: TextStyle(
+              fontWeight: FontWeight.w700,
+              color: Colors.brown.shade800,
+            ),
+          ),
+          Text('$value', style: const TextStyle(fontWeight: FontWeight.w600)),
         ],
       ),
     );
