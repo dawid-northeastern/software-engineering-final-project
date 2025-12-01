@@ -81,7 +81,9 @@ flutter:
     - assets/judge3.png
     - assets/salad.png
     - assets/smoke.gif
+    - assets/head_chef.png
     - assets/music/jazz.mp3
+    - assets/catering.gif
 
 
   # An image asset can refer to one or more resolution-specific "variants", see
