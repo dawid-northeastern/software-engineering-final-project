@@ -43,27 +43,36 @@ class _ModuleScreenState extends State<ModuleScreen> {
     });
   }
 
-  void _answer(bool correct) {
-    setState(() {
-      feedback = correct
-          // Emojis might be nice for the design (?) - keep or not? - we could add them to many other places
-          // and they work on any device (iOS, android, website)
-          ? 'Correct! 🎯'
-          : 'Not quite – review the slides and try again.';
-    }); // removed points from training modules
-    // Navigator.of(context).pop() - goes back to the main training screen
-    // this is nice becuase the user can review slides until the the .pop()
+  Future<void> _answer(bool correct) async {
+    // It's a 'Future' now becuase it awaits the user interaction 'Ok' button click
+    // Added extra notification for the quiz
+    // removed points from training modules
+    if (!mounted) return;
+
+    await showDialog<void>(
+      // Added a better notification for the answer the the quiz - notification on the whole screen
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text(correct ? 'Correct answer' : 'Incorrect answer'),
+        content: Text(
+          correct
+              ? 'Correct answer'
+              : 'Incorrect Answer: Please study the module again ',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('OK'), // Button to move forward to main screen
+          ),
+        ],
+      ),
+    );
+
+    if (!mounted) return;
     if (correct) {
       widget.onComplete();
-      Navigator.of(context).pop();
-      return;
     }
-
-    // goes back to the main training screen without marking the module complete
-    // as the answer was incorrect
-    if (!correct) {
-      Navigator.of(context).pop();
-    }
+    Navigator.of(context).pop();
   }
 
   @override
@@ -125,6 +134,11 @@ class _ModuleScreenState extends State<ModuleScreen> {
                       children: [
                         TextButton(
                           onPressed: index > 0 ? _back : null,
+                          style: TextButton.styleFrom(
+                            // Added background for the button to be better visable
+                            foregroundColor: Colors.brown.shade800,
+                            backgroundColor: Colors.white.withOpacity(0.9),
+                          ),
                           child: const Text('Back'),
                         ),
                         FilledButton(
@@ -168,6 +182,11 @@ class _ModuleScreenState extends State<ModuleScreen> {
                               feedback = null;
                             });
                           },
+                          style: TextButton.styleFrom(
+                            // Added background for the button to be better visable
+                            foregroundColor: Colors.brown.shade800,
+                            backgroundColor: Colors.white.withOpacity(0.9),
+                          ),
                           child: const Text('Review slides again'),
                         ),
                       ],

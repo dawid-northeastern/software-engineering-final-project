@@ -345,6 +345,33 @@ class _JudgeBriefScreenState extends State<JudgeBriefScreen> {
 
   // completely restarts the game
   Future<void> _restart() async {
+    final confirm = await showDialog<bool>(
+      // Added a warning that the 'Restart' is a hot restart and added a check if user wished to continue
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Warning'),
+          content: const Text(
+            'Warning: this restarts the game completely and clears the saved game.\n\nDo you want to continue?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () =>
+                  Navigator.of(context).pop(false), // Don't restrat
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop(true), // Restatr
+              child: const Text('Restart'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirm != true) return;
+
     await ProgressManager.instance.resetState();
     widget.state.restart();
     if (!mounted) return;
