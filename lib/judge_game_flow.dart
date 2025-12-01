@@ -1267,75 +1267,31 @@ class _ServeJudgeAnimationState extends State<ServeJudgeAnimation>
     with SingleTickerProviderStateMixin {
   late final AnimationController _c;
 
-  late final Animation<double> _plateSlide;
-  late final Animation<double> _plateScale;
-  late final Animation<double> _plateTilt;
-
-  late final List<Animation<double>> _steamRise;
-  late final List<Animation<double>> _steamFade;
-  late final List<Animation<double>> _steamDrift;
+  late final Animation<double> _badgeSlide;
+  late final Animation<double> _badgeScale;
+  late final Animation<double> _dimOpacity;
 
   @override
   void initState() {
     super.initState();
     _c = AnimationController(vsync: this, duration: widget.duration);
 
-    _plateSlide = CurvedAnimation(
+    _badgeSlide = CurvedAnimation(
       parent: _c,
       curve: const Interval(0.00, 0.45, curve: Curves.easeOutCubic),
     );
 
-    _plateScale = Tween<double>(begin: 0.90, end: 1.0).animate(
+    _badgeScale = Tween<double>(begin: 0.70, end: 1.0).animate(
       CurvedAnimation(
         parent: _c,
         curve: const Interval(0.00, 0.45, curve: Curves.easeOutBack),
       ),
     );
 
-    _plateTilt =
-        TweenSequence<double>([
-          TweenSequenceItem(tween: Tween(begin: -0.03, end: 0.0), weight: 35),
-          TweenSequenceItem(tween: Tween(begin: 0.0, end: 0.03), weight: 15),
-          TweenSequenceItem(tween: Tween(begin: 0.03, end: 0.0), weight: 20),
-        ]).animate(
-          CurvedAnimation(
-            parent: _c,
-            curve: const Interval(0.30, 0.80, curve: Curves.easeInOut),
-          ),
-        );
-
-    Animation<double> rise(double start, double end) =>
-        Tween<double>(begin: 0.0, end: 1.0).animate(
-          CurvedAnimation(
-            parent: _c,
-            curve: Interval(start, end, curve: Curves.easeOut),
-          ),
-        );
-
-    Animation<double> drift(double start, double end) =>
-        Tween<double>(begin: -1.0, end: 1.0).animate(
-          CurvedAnimation(
-            parent: _c,
-            curve: Interval(start, end, curve: Curves.easeInOut),
-          ),
-        );
-
-    _steamRise = [rise(0.30, 0.90), rise(0.38, 0.98), rise(0.46, 1.00)];
-    _steamFade = [
-      CurvedAnimation(
-        parent: _c,
-        curve: const Interval(0.30, 0.90, curve: Curves.easeInOut),
-      ),
-      CurvedAnimation(
-        parent: _c,
-        curve: const Interval(0.38, 0.98, curve: Curves.easeInOut),
-      ),
-      CurvedAnimation(
-        parent: _c,
-        curve: const Interval(0.46, 1.00, curve: Curves.easeInOut),
-      ),
-    ];
-    _steamDrift = [drift(0.30, 0.90), drift(0.38, 0.98), drift(0.46, 1.00)];
+    _dimOpacity = CurvedAnimation(
+      parent: _c,
+      curve: const Interval(0.00, 0.35, curve: Curves.easeOut),
+    );
 
     _c.addStatusListener((s) {
       if (s == AnimationStatus.completed) {
@@ -1357,149 +1313,75 @@ class _ServeJudgeAnimationState extends State<ServeJudgeAnimation>
     return IgnorePointer(
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        body: Center(
-          child: AnimatedBuilder(
-            animation: _c,
-            builder: (context, _) {
-              return SizedBox(
-                width: 240,
-                height: 240,
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Transform.translate(
-                      offset: Offset(0, (1 - _plateSlide.value) * 80),
-                      child: Transform.rotate(
-                        angle: _plateTilt.value,
-                        child: Transform.scale(
-                          scale: _plateScale.value,
-                          child: _PlateWidget(),
-                        ),
-                      ),
-                    ),
-                    for (int i = 0; i < 3; i++)
-                      _SteamPuff(
-                        rise: _steamRise[i].value,
-                        fade: _steamFade[i].value,
-                        drift: _steamDrift[i].value,
-                        xOffset: (i - 1) * 22.0,
-                      ),
-                    if (_c.value > 0.75 && _c.value < 0.92) _Sparkle(),
-                  ],
+        body: AnimatedBuilder(
+          animation: _c,
+          builder: (context, _) {
+            return Container(
+              color: Colors.black.withOpacity(0.5 * _dimOpacity.value),
+              child: Center(
+                child: Transform.translate(
+                  offset: Offset(0, (1 - _badgeSlide.value) * 80),
+                  child: Transform.scale(
+                    scale: _badgeScale.value,
+                    child: _CateringBadge(),
+                    alignment: Alignment.centerLeft,
+                  ),
                 ),
-              );
-            },
-          ),
+              ),
+            );
+          },
         ),
       ),
     );
   }
 }
 
-class _PlateWidget extends StatelessWidget {
+class _CateringBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Stack(
+    return Stack( 
       alignment: Alignment.center,
       children: [
         Container(
-          width: 170,
-          height: 34,
+          width: 320,
+          height: 320,
           decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.12),
-            borderRadius: BorderRadius.circular(24),
-          ),
-        ),
-        Container(
-          width: 180,
-          height: 180,
-          decoration: BoxDecoration(
-            color: Colors.white,
             shape: BoxShape.circle,
-            border: Border.all(color: Colors.brown.shade200, width: 6),
+            color: Colors.black.withOpacity(0.12),
             boxShadow: const [
               BoxShadow(
-                blurRadius: 12,
-                color: Colors.black12,
-                offset: Offset(0, 6),
+                blurRadius: 30,
+                color: Colors.black38,
+                offset: Offset(0, 18),
               ),
             ],
           ),
         ),
         Container(
-          width: 92,
-          height: 64,
+          width: 280,
+          height: 280,
           decoration: BoxDecoration(
-            color: const Color(0xFF7B3F00),
-            borderRadius: BorderRadius.circular(18),
-            gradient: LinearGradient(
-              colors: [const Color(0xFF7B3F00), Colors.brown.shade700],
-            ),
+            shape: BoxShape.circle,
+            border: Border.all(color: Colors.white, width: 8),
           ),
-          child: Center(
-            child: Container(
-              width: 62,
-              height: 6,
-              decoration: BoxDecoration(
-                color: Colors.brown.shade300,
-                borderRadius: BorderRadius.circular(3),
-              ),
+          clipBehavior: Clip.antiAlias,
+          child: Image.asset(
+            'assets/catering.gif',
+            fit: BoxFit.cover,
+          ),
+        ),
+        Container(
+          width: 320,
+          height: 320,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: Colors.white.withOpacity(0.35),
+              width: 4,
             ),
           ),
         ),
       ],
-    );
-  }
-}
-
-class _SteamPuff extends StatelessWidget {
-  final double rise;
-  final double fade;
-  final double drift;
-  final double xOffset;
-
-  const _SteamPuff({
-    required this.rise,
-    required this.fade,
-    required this.drift,
-    required this.xOffset,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final dy = -90 * Curves.easeOut.transform(rise);
-    final dx = 14 * drift;
-
-    return Opacity(
-      opacity: fade.clamp(0.0, 1.0),
-      child: Transform.translate(
-        offset: Offset(xOffset + dx, -30 + dy),
-        child: Container(
-          width: 20 - 6 * rise,
-          height: 16 - 4 * rise,
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.85 - 0.6 * rise),
-            borderRadius: BorderRadius.circular(20),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _Sparkle extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Transform.translate(
-      offset: const Offset(60, -40),
-      child: Container(
-        width: 10,
-        height: 10,
-        decoration: const BoxDecoration(
-          shape: BoxShape.circle,
-          color: Colors.white,
-        ),
-      ),
     );
   }
 }
