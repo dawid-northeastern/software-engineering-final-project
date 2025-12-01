@@ -170,7 +170,7 @@ class GameState {
 
   // submit function was extended to not just record the choice
   // it calls _trackExperience which compares the player's selection against judge
-  // preferences, adjusts xp and errors in ProgresssManager and show snackbar (the
+  // preferences, adjusts points and errors in ProgresssManager and show snackbar (the
   // notification on bottom of the screen that doesn't interrupt the game) for correct/incorrect
   // It adds JudgeResult like previously and increments the index to move to the next judge
   void submit(BuildContext context, JudgeSelection sel) {
@@ -180,7 +180,7 @@ class GameState {
   }
 
   // _trackExperience compares player selection to judge prerefence
-  // it updates xp and errors based on it
+  // it updates points and errors based on it
   // seperate points for each: thickness, cut, doneness
   void _trackExperience(
     BuildContext context,
@@ -216,8 +216,8 @@ class GameState {
   // creates a simple notification (snackbar) for each decision
   void _notify(BuildContext context, bool correct) {
     final text = correct
-        ? 'Correct answer: +15 XP'
-        : 'Incorrect answer: -10 XP';
+        ? 'Correct answer: +15 Points'
+        : 'Incorrect answer: -10 Points';
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(text), behavior: SnackBarBehavior.floating),
     );
@@ -293,7 +293,7 @@ class LabelChip extends StatelessWidget {
 // different screens for judge game flow
 
 // NEW - this is a Stateful widget now as it reacts to game state manaagmenet
-// and the current state (xp, errors)
+// and the current state (points, errors)
 // It also allows to save/load/restart
 // It provides notification based on the user actions
 // Bascially, it rebuilds the game when state changes all based on 'GameState' instance which
@@ -385,7 +385,7 @@ class _JudgeBriefScreenState extends State<JudgeBriefScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _StatBadge(label: 'XP', value: pm.experience),
+                _StatBadge(label: 'Points', value: pm.experience),
                 _StatBadge(label: 'Errors', value: pm.errors),
               ],
             ),
@@ -500,7 +500,7 @@ class _CutPickScreenState extends State<CutPickScreen> {
       ProgressManager.instance.addIncorrect();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Incorrect answer: -10 XP'),
+          content: Text('Incorrect answer: -10 Points'),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -768,13 +768,19 @@ class _DonenessPickScreenState extends State<DonenessPickScreen> {
   // stores choosen doneness into 'selection'
   // the new code is here as doneness is the last part before evaluation
   Future<void> _serve() async {
+    final judgeProfile = widget
+        .state
+        .current; // capture before state advances - this fixes the issue after no AI feedback for the last judge
     widget.selection.doneness = Doneness.values[_index];
 
     // scores the selections, updates progress, and go to next judge
     widget.state.submit(context, widget.selection);
 
     // Displau the judge (AI) feedback
-    await _showFeedback(context);
+    await _showFeedback(
+      context,
+      judgeProfile,
+    ); // Added to make sure the AI feedback correctly displays for each judge
 
     // go to final stage or go to next judge if there is one
     final targetRoute = widget.state.isFinished
@@ -801,9 +807,11 @@ class _DonenessPickScreenState extends State<DonenessPickScreen> {
   }
 
   // Imporant function that deals with judge (AI) feedback
-  Future<void> _showFeedback(BuildContext context) async {
+  Future<void> _showFeedback(
+    BuildContext context,
+    JudgeProfile judgeProfile,
+  ) async {
     try {
-      final judgeProfile = widget.state.current;
       final judge = Judge(
         name: judgeProfile.name,
         age: 30, // for now hardcoded
@@ -874,8 +882,11 @@ class _DonenessPickScreenState extends State<DonenessPickScreen> {
   @override
   Widget build(BuildContext context) {
     final labels = Doneness.values.map(labelDoneness).toList();
-    final j = widget.state.current;
-
+    final j = widget.state.isFinished
+        ? widget.state.judges.last
+        : widget
+              .state
+              .current; // Fixes the issue of displaying the feedback for the last judge before moving to 'Results' screen
     return Scaffold(
       appBar: AppBar(
         title: Text('Pick Doneness • ${j.name}'),
@@ -1028,8 +1039,8 @@ class _ResultCard extends StatelessWidget {
   }
 }
 
-// Rendering for the state management (XP and Error number)
-// used to display errors and xp in structured way
+// Rendering for the state management (Points and Error number)
+// used to display errors and points in structured way
 class _StatBadge extends StatelessWidget {
   final String label;
   final int value;
@@ -1118,10 +1129,10 @@ class EndingScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     // NEW - gives how many ex more needed to win or how many errors less to win
     final pm = ProgressManager.instance;
-    final xp = pm.experience;
+    final points = pm.experience;
     final errs = pm.errors;
-    final bool win = xp > 50 && errs < 5;
-    final int xpShort = win ? 0 : (xp >= 50 ? 0 : 50 - xp);
+    final bool win = points > 50 && errs < 5;
+    final int pointsShort = win ? 0 : (points >= 50 ? 0 : 50 - points);
     final int errOver = win ? 0 : (errs <= 5 ? 0 : errs - 5);
 
     return Scaffold(
@@ -1162,11 +1173,17 @@ class EndingScreen extends StatelessWidget {
                   Text(
                     win
                         ? 'Great job! You reached the target with solid execution.'
-                        : _lossMessage(xpShort: xpShort, errOver: errOver),
+                        : _lossMessage(
+                            pointsShort: pointsShort,
+                            errOver: errOver,
+                          ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 16),
-                  Text('Total XP: $xp', style: const TextStyle(fontSize: 16)),
+                  Text(
+                    'Total Points: $points',
+                    style: const TextStyle(fontSize: 16),
+                  ),
                   Text(
                     'Total Errors: $errs',
                     style: const TextStyle(fontSize: 16),
@@ -1193,10 +1210,10 @@ class EndingScreen extends StatelessWidget {
     );
   }
 
-  // Specific message on how many xp and errors needed to win
-  static String _lossMessage({required int xpShort, required int errOver}) {
+  // Specific message on how many points and errors needed to win
+  static String _lossMessage({required int pointsShort, required int errOver}) {
     final parts = <String>[];
-    if (xpShort > 0) parts.add('You need $xpShort more XP');
+    if (pointsShort > 0) parts.add('You need $pointsShort more Points');
     if (errOver > 0) parts.add('Reduce errors by $errOver');
     if (parts.isEmpty) return 'Keep training to sharpen your skills.';
     return parts.join(' • ');
