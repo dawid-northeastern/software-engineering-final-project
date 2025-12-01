@@ -1,9 +1,9 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
 // NEW - Game State Management System
-// It tracks the XP and number of errors
+// It tracks the Points and number of errors
 // The game is 'won' meaning the training and test is passed if
-// the XP is > 50 and errors < 5
+// the Points are > 50 and errors < 5
 // This can definitely be changed
 
 class ProgressLoadResult {
@@ -21,7 +21,8 @@ class ProgressManager {
   ProgressManager._();
   static final ProgressManager instance = ProgressManager._();
 
-  static const _xpKey = 'progress_xp';
+  static const _pointsKey =
+      'progress_points'; // Renamed 'xp' to points for clearer user interaction
   static const _errorsKey = 'progress_errors';
   static const _completedKey = 'progress_completed_modules';
   static const _judgeIndexKey = 'progress_judge_index';
@@ -46,7 +47,7 @@ class ProgressManager {
     int? judgeIndex,
   }) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(_xpKey, experience);
+    await prefs.setInt(_pointsKey, experience);
     await prefs.setInt(_errorsKey, errors);
     await prefs.setStringList(_completedKey, completedModules.toList());
     if (judgeIndex != null) {
@@ -57,7 +58,7 @@ class ProgressManager {
 
   Future<ProgressLoadResult> loadState() async {
     final prefs = await SharedPreferences.getInstance();
-    experience = prefs.getInt(_xpKey) ?? 0;
+    experience = prefs.getInt(_pointsKey) ?? 0;
     errors = prefs.getInt(_errorsKey) ?? 0;
     final completed = prefs.getStringList(_completedKey) ?? const [];
     final judgeIndex = prefs.getInt(_judgeIndexKey);
@@ -74,7 +75,7 @@ class ProgressManager {
     errors = 0;
     judgeUnlocked = false;
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_xpKey);
+    await prefs.remove(_pointsKey);
     await prefs.remove(_errorsKey);
     await prefs.remove(_completedKey);
     await prefs.remove(_judgeIndexKey);

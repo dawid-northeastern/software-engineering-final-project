@@ -321,9 +321,9 @@ class _ModulesScreenState extends State<ModulesScreen> {
   Widget build(BuildContext context) {
     final total = modules.length;
     final done = _completedCount;
-    final allCompleted = done == total && total > 0;
-    final pm = ProgressManager
-        .instance; // NEW - this gives access to state anagment (XP, error numbers)
+    final allCompleted =
+        done ==
+        total & total > 0; // Removed points and errors from learning modules
 
     final cuts = modules[0];
     final thickness = modules[1];
@@ -360,15 +360,9 @@ class _ModulesScreenState extends State<ModulesScreen> {
                             fontWeight: FontWeight.w700,
                           ),
                         ),
-                        const SizedBox(height: 6),
-                        Row(
-                          children: [
-                            _StatBadge(label: 'XP', value: pm.experience),
-                            const SizedBox(width: 12),
-                            _StatBadge(label: 'Errors', value: pm.errors),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
+                        const SizedBox(
+                          height: 6,
+                        ), // Removed points and errors from training modules
                         Wrap(
                           spacing: 8,
                           runSpacing: 8,
@@ -485,40 +479,6 @@ class _ModulesScreenState extends State<ModulesScreen> {
               ),
             ),
           ),
-        ],
-      ),
-    );
-  }
-}
-
-// Rendering for the state management (XP and Error number)
-// used to display errors and xp in structured way
-class _StatBadge extends StatelessWidget {
-  final String label;
-  final int value;
-
-  const _StatBadge({required this.label, required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.92),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.brown.withOpacity(0.25)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            '$label: ',
-            style: TextStyle(
-              fontWeight: FontWeight.w700,
-              color: Colors.brown.shade800,
-            ),
-          ),
-          Text('$value', style: const TextStyle(fontWeight: FontWeight.w600)),
         ],
       ),
     );

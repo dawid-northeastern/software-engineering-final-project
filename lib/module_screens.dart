@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'progress_manager.dart'; // NEW - this is the file with state management
 
 class ModuleScreen extends StatefulWidget {
   final String title;
@@ -51,31 +50,7 @@ class _ModuleScreenState extends State<ModuleScreen> {
           // and they work on any device (iOS, android, website)
           ? 'Correct! 🎯'
           : 'Not quite – review the slides and try again.';
-    });
-
-    // pm is progress manager for state management (XP and error number)
-    // correct adds 15 xp
-    // incorrect removed 10 xp and adds a count to error numbers
-    final pm = ProgressManager.instance;
-    if (correct) {
-      pm.addCorrect();
-    } else {
-      pm.addIncorrect();
-    }
-
-    // notification on the bottom of the screen informing the user on state managment change
-    // without interrupting the game (less annoying)
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          correct ? 'Correct answer: +15 XP' : 'Incorrect answer: -10 XP',
-        ),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-
-    // this mark the module as completed so the user cannot do it again (that would be
-    // a glitch where user could generate infinite amount of xp
+    }); // removed points from training modules
     // Navigator.of(context).pop() - goes back to the main training screen
     // this is nice becuase the user can review slides until the the .pop()
     if (correct) {
@@ -94,7 +69,6 @@ class _ModuleScreenState extends State<ModuleScreen> {
   @override
   Widget build(BuildContext context) {
     final totalSlides = widget.slideTexts.length + 1; // +1 for quick check
-    final pm = ProgressManager.instance;
 
     return Scaffold(
       body: Stack(
@@ -108,15 +82,6 @@ class _ModuleScreenState extends State<ModuleScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Header - NEW - includes state management XP and error numbers
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      _StatBadge(label: 'XP', value: pm.experience),
-                      _StatBadge(label: 'Errors', value: pm.errors),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
                   Text(
                     widget.title,
                     style: const TextStyle(
@@ -289,46 +254,5 @@ class _ModuleScreenState extends State<ModuleScreen> {
         ],
       );
     }
-  }
-}
-
-// Rendering for the state management (XP and Error number)
-// used to display errors and xp in structured way
-class _StatBadge extends StatelessWidget {
-  final String label;
-  final int value;
-
-  const _StatBadge({required this.label, required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.9),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.brown.shade200),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            '$label: ',
-            style: TextStyle(
-              fontWeight: FontWeight.w700,
-              color: Colors.brown.shade800,
-            ),
-          ),
-          Text('$value', style: const TextStyle(fontWeight: FontWeight.w600)),
-        ],
-      ),
-    );
   }
 }
