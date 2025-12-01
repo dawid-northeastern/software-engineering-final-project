@@ -24,6 +24,7 @@ class ModuleScreen extends StatefulWidget {
 class _ModuleScreenState extends State<ModuleScreen> {
   int index = 0;
   String? feedback;
+  late final ScrollController _scrollController = ScrollController();
 
   void _next() {
     setState(() {
@@ -76,6 +77,12 @@ class _ModuleScreenState extends State<ModuleScreen> {
   }
 
   @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final totalSlides = widget.slideTexts.length + 1; // +1 for quick check
 
@@ -108,7 +115,7 @@ class _ModuleScreenState extends State<ModuleScreen> {
                   // Card with slide content
                   Expanded(
                     child: Container(
-                      padding: const EdgeInsets.all(18),
+                      padding: const EdgeInsets.fromLTRB(18, 18, 0, 18),
                       decoration: BoxDecoration(
                         color: const Color(0xFFFFF7E6).withOpacity(0.97),
                         borderRadius: BorderRadius.circular(20),
@@ -123,7 +130,20 @@ class _ModuleScreenState extends State<ModuleScreen> {
                           ),
                         ],
                       ),
-                      child: SingleChildScrollView(child: _buildSlide()),
+                      child: RawScrollbar(
+                        controller: _scrollController,
+                        thumbVisibility: true,
+                        thumbColor: Colors.brown.shade600,
+                        thickness: 6,
+                        radius: const Radius.circular(8),
+                        child: SingleChildScrollView(
+                          controller: _scrollController,
+                          child: Padding(
+                            padding: const EdgeInsets.only(right: 18),
+                            child: _buildSlide(),
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 16),
