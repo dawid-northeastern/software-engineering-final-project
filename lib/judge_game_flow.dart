@@ -132,7 +132,7 @@ class GameState {
       name: 'Adam',
       level: 'High-level judge',
       bio:
-          'Precision taster. Loves balance and tenderness; not keen on fatty bites.',
+          'Precision taster. Loves balance and tenderness; not keen on fatty bites. Prefers a thick, tender cut (like fillets) cooked gently to a medium rare.',
       portraitAsset: 'assets/judge1.png',
       portraitAlign: Alignment(0, -0.28),
       preferredCut: Cut.fillet,
@@ -143,7 +143,7 @@ class GameState {
       name: 'Amanda',
       level: 'Butcher judge',
       bio:
-          'All about marbling and aroma. Prefers a classic ribeye, standard thickness.',
+          'All about marbling and beefy aroma. Wants juice in every bite. A classic normal sized ribeye cooked to midway (medium)',
       portraitAsset: 'assets/judge2.png',
       portraitAlign: Alignment(0, -0.18),
       preferredCut: Cut.ribeye,
@@ -153,7 +153,8 @@ class GameState {
     JudgeProfile(
       name: 'Lucas',
       level: 'Technique judge',
-      bio: 'Obsessed with sear quality. Loves sirloins at medium well.',
+      bio:
+          'Obsesses over a clean sear. Enjoys a nice fat cap on the side typically seen in sirloins. He likes a standard size cooked to medium well.',
       portraitAsset: 'assets/judge3.png',
       portraitAlign: Alignment(0, -0.35),
       preferredCut: Cut.sirloin,
@@ -469,12 +470,40 @@ class _JudgeBriefScreenState extends State<JudgeBriefScreen> {
               ],
             ),
             const SizedBox(height: 12),
-            Text(
-              '${j.name} • ${j.level}',
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            Container(
+              padding: const EdgeInsets.all(18),
+              constraints: const BoxConstraints(minHeight: 180),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFF7E6),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.brown.withOpacity(0.25)),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 100,
+                    height: 100,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white,
+                      image: DecorationImage(
+                        image: AssetImage(j.portraitAsset),
+                        fit: BoxFit.cover,
+                        alignment: j.portraitAlign,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Text(
+                      '${j.name} • ${j.level}\n\n${j.bio}',
+                      style: const TextStyle(fontSize: 16.5, height: 1.4),
+                    ),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 12),
-            Text(j.bio, style: const TextStyle(fontSize: 16)),
             const SizedBox(height: 22),
             FilledButton(
               onPressed: () {
