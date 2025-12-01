@@ -378,6 +378,36 @@ class _ModulesScreenState extends State<ModulesScreen> {
                             OutlinedButton(
                               child: const Text('Restart'),
                               onPressed: () async {
+                                final confirm = await showDialog<bool>(
+                                  // Added a warning that the 'Restart' is a hot restart and added a check if user wished to continue
+                                  context: context,
+                                  barrierDismissible: false,
+                                  builder: (context) {
+                                    return AlertDialog(
+                                      title: const Text('Warning'),
+                                      content: const Text(
+                                        'Warning: this restarts the game completely and clears the saved game.\n\nDo you want to continue?',
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () => Navigator.of(
+                                            context,
+                                          ).pop(false), // Don't restart
+                                          child: const Text('Cancel'),
+                                        ),
+                                        FilledButton(
+                                          onPressed: () => Navigator.of(
+                                            context,
+                                          ).pop(true), // Restart
+                                          child: const Text('Restart'),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+
+                                if (confirm != true) return;
+
                                 await ProgressManager.instance.resetState();
                                 if (context.mounted) {
                                   Navigator.of(
