@@ -178,6 +178,20 @@ class _ModulesScreenState extends State<ModulesScreen> {
             'Which approach to searing and cooking is correct?',
       ),
     ];
+
+    // Load progress
+    Future.microtask(() async {
+      final pm = ProgressManager.instance;
+      final result = await pm.loadState();
+      if (!mounted) return;
+      setState(() {
+        for (final m in modules) {
+          m.status = result.completedModules.contains(m.id)
+              ? ModuleStatus.completed
+              : ModuleStatus.notStarted;
+        }
+      });
+    });
   }
 
   int get _completedCount {
@@ -203,16 +217,6 @@ class _ModulesScreenState extends State<ModulesScreen> {
   // that doesn't interrupt the game but just informs the user
   // Otherise it opens the module to learn
   Future<void> _openModule(ModuleInfo module) async {
-    if (module.isCompleted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('${module.title} is already completed.'),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-      return;
-    }
-
     // Pushed to navigator the learning module screen if the module was
     // not completed
     // Push (and pop) is useful for moving between the modules screen and the
@@ -238,6 +242,13 @@ class _ModulesScreenState extends State<ModulesScreen> {
             setState(() {
               module.status = ModuleStatus.completed;
             });
+
+            final pm = ProgressManager.instance;
+            final completedIds = modules
+                .where((m) => m.isCompleted)
+                .map((m) => m.id)
+                .toList();
+            pm.saveState(completedModules: completedIds);
             if (_completedCount == modules.length) {
               widget.onCompleteAll?.call();
             }

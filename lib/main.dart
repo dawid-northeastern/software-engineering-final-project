@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'modules.dart';
 import 'judge_game_flow.dart';
+import 'progress_manager.dart';
 
 void main() {
   runApp(const SteakMasterApp());
@@ -94,8 +95,39 @@ class _HomeScreenState extends State<HomeScreen> {
     AudioController.start();
   }
 
+  bool _practiceEnabled = false;
+  bool _refreshScheduled = false;
+
+  Future<void> _refreshPracticeEnabled() async {
+    final result = await ProgressManager.instance.loadState();
+    if (!mounted) return;
+    setState(() {
+      _practiceEnabled = result.completedModules.length >= 4;
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    Future.microtask(() async {
+      final result = await ProgressManager.instance.loadState();
+      if (!mounted) return;
+      setState(() {
+        _practiceEnabled = result.completedModules.length >= 4;
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (!_refreshScheduled) {
+      _refreshScheduled = true;
+      Future.microtask(() async {
+        await _refreshPracticeEnabled();
+        _refreshScheduled = false;
+      });
+    }
     return Scaffold(
       body: Stack(
         fit: StackFit.expand,
@@ -163,28 +195,44 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 const SizedBox(height: 12),
                 FilledButton(
-                  style: FilledButton.styleFrom(
-                    backgroundColor: Colors.brown.shade700,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 22,
-                      vertical: 14,
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.resolveWith<Color?>((
+                      states,
+                    ) {
+                      if (states.contains(MaterialState.disabled)) {
+                        return Colors.grey; // grayd out when disabled
+                      }
+                      return Colors.brown.shade700;
+                    }),
+                    foregroundColor: MaterialStateProperty.resolveWith<Color?>((
+                      states,
+                    ) {
+                      if (states.contains(MaterialState.disabled)) {
+                        return Colors.white70;
+                      }
+                      return Colors.white;
+                    }),
+                    padding: MaterialStateProperty.all(
+                      const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
                     ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                    shape: MaterialStateProperty.all(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                   ),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const IntroScreen(mode: 'practice'),
-                      ),
-                    );
-                  },
-                  child: const Text(
-                    'Begin: Practice Mode',
-                  ), // NEW - allow to move directly to the judges game
+                  onPressed: _practiceEnabled
+                      ? () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  const IntroScreen(mode: 'practice'),
+                            ),
+                          );
+                        }
+                      : null,
+                  child: const Text('Begin: Practice Mode'),
                 ),
               ],
             ),
