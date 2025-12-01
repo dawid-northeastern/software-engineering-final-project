@@ -159,7 +159,32 @@ class _HomeScreenState extends State<HomeScreen> {
                       MaterialPageRoute(builder: (_) => const IntroScreen()),
                     );
                   },
-                  child: const Text("Begin Training"),
+                  child: const Text('Begin: Learn and Practice Mode'),
+                ),
+                const SizedBox(height: 12),
+                FilledButton(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Colors.brown.shade700,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 22,
+                      vertical: 14,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const IntroScreen(mode: 'practice'),
+                      ),
+                    );
+                  },
+                  child: const Text(
+                    'Begin: Practice Mode',
+                  ), // NEW - allow to move directly to the judges game
                 ),
               ],
             ),
@@ -171,10 +196,45 @@ class _HomeScreenState extends State<HomeScreen> {
 }
 
 class IntroScreen extends StatelessWidget {
-  const IntroScreen({super.key});
+  final String? mode; // Mode for the game (training + judge or judge)
+  const IntroScreen({super.key, this.mode});
+
+  bool get isPractice => mode == 'practice';
 
   @override
   Widget build(BuildContext context) {
+    // Added message based on if it's the training + judge game or only judge game
+    final message = isPractice
+        ? "Your goal is to prepare steaks exactly according to each client's preferences.\n\n"
+              "Prepare the steaks according to requirements of the judges and clients.\n\n"
+              "Each correct response gives you 15 points and incorrect deducts 10 points.\n\n"
+              "The number of errors is also tracked.\n\n"
+              "To pass the test, you need more than 50 points and less than 5 errors."
+        : "Your goal is to prepare steaks exactly according to each client's preferences.\n\n"
+              "Use the training modules to build your knowledge, then apply it in assessment rounds.\n\n"
+              "Prepare the steaks according to requirements of the judges and clients.\n\n"
+              "Each correct response gives you 15 points and incorrect deducts 10 points.\n\n"
+              "The number of errors is also tracked.\n\n"
+              "To pass the test, you need more than 50 points and less than 5 errors.";
+
+    final VoidCallback onContinue = isPractice
+        ? () {
+            Navigator.pushNamed(
+              context,
+              '/judge_brief',
+              arguments: GameState(),
+            );
+          }
+        : () {
+            Navigator.push(
+              context,
+              // switch to modules screen
+              MaterialPageRoute(builder: (_) => const ModulesScreen()),
+            );
+          };
+
+    final continueLabel = isPractice ? 'Continue to Practice' : 'Continue';
+
     return Scaffold(
       body: Stack(
         fit: StackFit.expand,
@@ -194,10 +254,9 @@ class IntroScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(color: Colors.brown.withOpacity(0.25)),
                     ),
-                    child: const Text(
-                      "Your goal is to prepare steaks exactly according to each client's preferences.\n\n"
-                      "Use the training modules to build your knowledge, then apply it in assessment rounds.",
-                      style: TextStyle(fontSize: 16.5, height: 1.35),
+                    child: Text(
+                      message, // refactored code for redundancy
+                      style: const TextStyle(fontSize: 16.5, height: 1.35),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -212,16 +271,8 @@ class IntroScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          // switch to modules screen
-                          MaterialPageRoute(
-                            builder: (_) => const ModulesScreen(),
-                          ),
-                        );
-                      },
-                      child: const Text("Continue"),
+                      onPressed: onContinue,
+                      child: Text(continueLabel),
                     ),
                   ),
                   const SizedBox(height: 12),
