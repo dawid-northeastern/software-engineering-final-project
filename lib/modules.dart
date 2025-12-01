@@ -322,8 +322,8 @@ class _ModulesScreenState extends State<ModulesScreen> {
     final total = modules.length;
     final done = _completedCount;
     final allCompleted =
-        done ==
-        total & total > 0; // Removed points and errors from learning modules
+        done == total &&
+        total > 0; // Removed points and errors from learning modules
 
     final cuts = modules[0];
     final thickness = modules[1];
