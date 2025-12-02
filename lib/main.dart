@@ -1,24 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:audioplayers/audioplayers.dart';
 import 'modules.dart';
 import 'judge_game_flow.dart';
 import 'progress_manager.dart';
+import 'audio_controller.dart';
 
 void main() {
   runApp(const SteakMasterApp());
-}
-
-class AudioController {
-  static final AudioPlayer player = AudioPlayer();
-
-  static Future<void> start() async {
-    await player.setReleaseMode(ReleaseMode.loop);
-    await player.play(AssetSource('music/jazz.mp3'));
-  }
-
-  static void stop() {
-    player.stop();
-  }
 }
 
 class SteakMasterApp extends StatelessWidget {
@@ -92,7 +79,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    AudioController.start();
+    AudioController.playMenu();
   }
 
   bool _practiceEnabled = true;
@@ -179,7 +166,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  onPressed: () {
+                  onPressed: () async {
+                    await AudioController.playMenu();
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (_) => const IntroScreen()),
@@ -216,7 +204,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   onPressed: _practiceEnabled
-                      ? () {
+                      ? () async {
+                          await AudioController.playGameplay();
                           Navigator.push(
                             context,
                             MaterialPageRoute(

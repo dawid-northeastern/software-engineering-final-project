@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'module_screens.dart';
 import 'judge_game_flow.dart';
 import 'progress_manager.dart'; // NEW - this is the file with state management
+import 'audio_controller.dart';
 
 enum ModuleStatus { notStarted, completed }
 
@@ -513,7 +514,8 @@ class _ModulesScreenState extends State<ModulesScreen> {
                   const SizedBox(height: 16),
                   if (allCompleted)
                     FilledButton(
-                      onPressed: () {
+                      onPressed: () async {
+                        await AudioController.playGameplay();
                         Navigator.pushNamed(
                           context,
                           '/judge_brief',
