@@ -34,12 +34,16 @@ class ProgressManager {
 
   void addCorrect({int count = 1}) {
     experience += 15 * count;
+    // persist updated points immediately
+    saveState();
   }
 
   void addIncorrect({int count = 1}) {
     errors += count;
     experience -= 10 * count;
     if (experience < 0) experience = 0;
+    // persist updated points and errors immediately
+    saveState();
   }
 
   Future<void> saveState({
