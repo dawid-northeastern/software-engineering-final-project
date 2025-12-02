@@ -70,7 +70,7 @@ class _ModulesScreenState extends State<ModulesScreen> {
               '• Often best around medium-rare / medium to keep some tenderness.',
         ],
         slideImages: [
-          'assets/steak.jpg',
+          'assets/different_cuts.jpeg',
           'assets/fillet.png',
           'assets/ribeye.png',
           'assets/sirloin.png',
@@ -104,7 +104,7 @@ class _ModulesScreenState extends State<ModulesScreen> {
               '• Resting is essential so the centre finishes cooking without drying out.',
         ],
         slideImages: [
-          'assets/ribeye.png',
+          'assets/thickness_image.jpeg',
           'assets/sirloin.png',
           'assets/fillet.png',
         ],
@@ -142,9 +142,9 @@ class _ModulesScreenState extends State<ModulesScreen> {
         ],
         slideImages: [
           'assets/doneness_chart.png',
-          'assets/fillet.png',
-          'assets/ribeye.png',
-          'assets/rump.jpg',
+          'assets/medium_rare.jpg',
+          'assets/medium.jpg',
+          'assets/well.jpg',
         ],
         questionText: 'Which statement about doneness is accurate?',
         options: [
@@ -179,8 +179,8 @@ class _ModulesScreenState extends State<ModulesScreen> {
         ],
         slideImages: [
           'assets/hot_pan.jpg',
-          'assets/ribeye.png',
-          'assets/sirloin.png',
+          'assets/oil_cooking.jpg',
+          'assets/turning_steak.jpg',
           'assets/steak_resting.jpg',
         ],
         questionText:

@@ -171,8 +171,7 @@ class GameState {
   final List<JudgeResult> results = [];
   int index = 0;
 
-  JudgeProfile get current =>
-      judges[index.clamp(0, judges.length - 1)];
+  JudgeProfile get current => judges[index.clamp(0, judges.length - 1)];
   bool get isFinished => index >= judges.length;
 
   // submit function was extended to not just record the choice
@@ -805,10 +804,7 @@ class _DonenessPickScreenState extends State<DonenessPickScreen> {
     widget.selection.doneness = Doneness.values[_index];
 
     // Display the judge (AI) feedback and capture score
-    final score = await _showFeedback(
-      context,
-      judgeProfile,
-    );
+    final score = await _showFeedback(context, judgeProfile);
 
     // record the result and go to next judge
     widget.state.submit(widget.selection, score ?? 0);
@@ -1013,11 +1009,14 @@ class SummaryScreen extends StatelessWidget {
 
   void _finish(BuildContext context) {
     final total = state.results.fold<double>(0, (sum, r) => sum + r.score);
-    final avg =
-        state.results.isEmpty ? 0.0 : total / state.results.length.toDouble();
+    final avg = state.results.isEmpty
+        ? 0.0
+        : total / state.results.length.toDouble();
     final img = avg >= 80
         ? 'assets/ending_michelin.jpg'
-        : (avg >= 60 ? 'assets/ending_tripadvisor.jpg' : 'assets/ending_empty.jpg');
+        : (avg >= 60
+              ? 'assets/ending_tripadvisor.jpg'
+              : 'assets/ending_empty.jpg');
     Navigator.pushReplacementNamed(
       context,
       '/judge_ending',
@@ -1219,8 +1218,8 @@ class EndingScreen extends StatelessWidget {
                     topWin
                         ? 'You have earned a Michelin star. Exceptional work!'
                         : (midWin
-                            ? 'Solid cooking. Judges were impressed with your steak cooking ability.'
-                            : 'To become a chef it is essential to practice consistently and learn from every experience as the market competition is very high!.'),
+                              ? 'Solid cooking. Judges were impressed with your steak cooking ability.'
+                              : 'To become a chef it is essential to practice consistently and learn from every experience as the market competition is very high!.'),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 16),
@@ -1348,7 +1347,7 @@ class _ServeJudgeAnimationState extends State<ServeJudgeAnimation>
 class _CateringBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Stack( 
+    return Stack(
       alignment: Alignment.center,
       children: [
         Container(
@@ -1374,20 +1373,14 @@ class _CateringBadge extends StatelessWidget {
             border: Border.all(color: Colors.white, width: 8),
           ),
           clipBehavior: Clip.antiAlias,
-          child: Image.asset(
-            'assets/catering.gif',
-            fit: BoxFit.cover,
-          ),
+          child: Image.asset('assets/catering.gif', fit: BoxFit.cover),
         ),
         Container(
           width: 320,
           height: 320,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            border: Border.all(
-              color: Colors.white.withOpacity(0.35),
-              width: 4,
-            ),
+            border: Border.all(color: Colors.white.withOpacity(0.35), width: 4),
           ),
         ),
       ],

@@ -59,32 +59,7 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - assets/grill.jpg
-    - assets/steak.jpg
-    - assets/doneness_chart.png
-    - assets/cutting_board.png
-    - assets/cow_fillet.png
-    - assets/cow_ribeye.png
-    - assets/cow_sirloin.png
-    - assets/hot_pan.jpg
-    - assets/fillet.png
-    - assets/ribeye.png
-    - assets/sirloin.png
-    - assets/rump.jpg
-    - assets/steak_resting.jpg
-    - assets/kitchen.jpg
-    - assets/ending_michelin.jpg
-    - assets/ending_empty.jpg
-    - assets/ending_tripadvisor.jpg
-    - assets/judge1.png
-    - assets/judge2.png
-    - assets/judge3.png
-    - assets/salad.png
-    - assets/smoke.gif
-    - assets/head_chef.png
-    - assets/music/gameplay_music.mp3
-    - assets/music/jazz.mp3
-    - assets/catering.gif
+    - assets/
 
 
   # An image asset can refer to one or more resolution-specific "variants", see
