@@ -94,6 +94,10 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+// cant override with force being true - works perfectly now
+    if (ModalRoute.of(context)?.isCurrent == true) {
+      AudioController.playMenu(force: true);
+    }
 
     Future.microtask(() async {
       if (!mounted) return;

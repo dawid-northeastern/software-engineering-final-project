@@ -337,7 +337,7 @@ class _JudgeBriefScreenState extends State<JudgeBriefScreen> {
     await ProgressManager.instance.resetState();
     widget.state.restart();
     if (!mounted) return;
-    await AudioController.playMenu();
+    await AudioController.playMenu(force: true);
     Navigator.of(context).popUntil((route) => route.isFirst);
   }
 
@@ -1238,7 +1238,7 @@ class EndingScreen extends StatelessWidget {
                       await ProgressManager.instance.resetState();
                       state.restart();
                       if (context.mounted) {
-                        await AudioController.playMenu();
+                        await AudioController.playMenu(force: true);
                         Navigator.of(
                           context,
                         ).popUntil((route) => route.isFirst);

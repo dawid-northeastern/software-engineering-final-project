@@ -209,6 +209,14 @@ class _ModulesScreenState extends State<ModulesScreen> {
     });
   }
 
+  @override // had to add for audio controller to work properly when going back to modules screen
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (ModalRoute.of(context)?.isCurrent == true) {
+      AudioController.playMenu(force: true);
+    }
+  }
+
   int get _completedCount {
     int count = 0;
     for (final m in modules) {

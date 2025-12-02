@@ -4,14 +4,18 @@ class AudioController {
   static final AudioPlayer player = AudioPlayer();
   static String? _currentAsset;
   static bool _muted = false;
+  static String _mode = 'menu'; // 'menu' or 'game'
 
   static bool get isMuted => _muted;
 
-  static Future<void> playMenu() async {
+  static Future<void> playMenu({bool force = false}) async {
+    if (!force && _mode == 'game') return;
+    _mode = 'menu';
     await _playIfNeeded('music/jazz.mp3');
   }
 
   static Future<void> playGameplay() async {
+    _mode = 'game';
     await _playIfNeeded('music/gameplay_music.mp3');
   }
 
