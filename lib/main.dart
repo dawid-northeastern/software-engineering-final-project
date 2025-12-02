@@ -249,15 +249,10 @@ class IntroScreen extends StatelessWidget {
     final message = isPractice
         ? "Your goal is to prepare steaks exactly according to each client's preferences.\n\n"
               "Prepare the steaks according to requirements of the judges and clients.\n\n"
-              "Each correct response gives you 15 points and incorrect deducts 10 points.\n\n"
-              "The number of errors is also tracked.\n\n"
-              "To pass the test, you need more than 50 points and less than 5 errors."
         : "Your goal is to prepare steaks exactly according to each client's preferences.\n\n"
               "Use the training modules to build your knowledge, then apply it in assessment rounds.\n\n"
               "Prepare the steaks according to requirements of the judges and clients.\n\n"
-              "Each correct response gives you 15 points and incorrect deducts 10 points.\n\n"
-              "The number of errors is also tracked.\n\n"
-              "To pass the test, you need more than 50 points and less than 5 errors.";
+              "Your finally performance will be evaluated based on the judges' feedback.\n\n";
 
     final VoidCallback onContinue = isPractice
         ? () {
