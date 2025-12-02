@@ -366,6 +366,13 @@ class _JudgeBriefScreenState extends State<JudgeBriefScreen> {
         ), // NEW - had to change from state.index to widget.state.index based on the new structued (explained above)
         backgroundColor: Colors.brown.shade700,
         foregroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () async {
+            await AudioController.playMenu();
+            if (context.mounted) Navigator.of(context).pop();
+          },
+        ),
       ),
       body: BoardBackground(
         child: ListView(
@@ -545,6 +552,13 @@ class _CutPickScreenState extends State<CutPickScreen> {
         title: Text('Pick Cut • ${j.name}'),
         backgroundColor: Colors.brown.shade700,
         foregroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () async {
+            await AudioController.playMenu();
+            if (context.mounted) Navigator.of(context).pop();
+          },
+        ),
       ),
       body: BoardBackground(
         child: GridView.count(
@@ -652,6 +666,13 @@ class _ThicknessPickScreenState extends State<ThicknessPickScreen> {
         title: Text('Pick Thickness • ${j.name}'),
         backgroundColor: Colors.brown.shade700,
         foregroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () async {
+            await AudioController.playMenu();
+            if (context.mounted) Navigator.of(context).pop();
+          },
+        ),
       ),
       body: BoardBackground(
         child: ListView(
@@ -904,6 +925,13 @@ class _DonenessPickScreenState extends State<DonenessPickScreen> {
         title: Text('Pick Doneness • ${j.name}'),
         backgroundColor: Colors.brown.shade700,
         foregroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () async {
+            await AudioController.playMenu();
+            if (context.mounted) Navigator.of(context).pop();
+          },
+        ),
       ),
       body: BoardBackground(
         child: ListView(
@@ -1004,6 +1032,13 @@ class SummaryScreen extends StatelessWidget {
         title: const Text('Results'),
         backgroundColor: Colors.brown.shade700,
         foregroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () async {
+            await AudioController.playMenu();
+            if (context.mounted) Navigator.of(context).pop();
+          },
+        ),
       ),
       body: BoardBackground(
         child: ListView(
