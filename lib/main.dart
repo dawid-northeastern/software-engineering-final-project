@@ -84,6 +84,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   bool _practiceEnabled = true;
   bool _refreshScheduled = false;
+  bool _muted = AudioController.isMuted;
 
   Future<void> _refreshPracticeEnabled() async {
     if (!mounted) return;
@@ -126,6 +127,26 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           Container(color: Colors.black.withOpacity(0.35)),
+          SafeArea(
+            child: Align(
+              alignment: Alignment.topRight,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 8, right: 8),
+                child: IconButton(
+                  style: IconButton.styleFrom(
+                    backgroundColor: Colors.black54,
+                    foregroundColor: Colors.white,
+                  ),
+                  icon: Icon(_muted ? Icons.volume_off : Icons.volume_up),
+                  onPressed: () async {
+                    final next = !_muted;
+                    setState(() => _muted = next);
+                    await AudioController.setMuted(next);
+                  },
+                ),
+              ),
+            ),
+          ),
           Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,

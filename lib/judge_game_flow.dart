@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'progress_manager.dart'; // NEW - game state managmenet is updated on each decision and gives final result
 import 'ai_service.dart'; // NEW - added the ai_serivce to the feedback from the 'judges'
+import 'audio_controller.dart';
 
 // enums below (we got to refactor and separate files later)
 
@@ -336,6 +337,7 @@ class _JudgeBriefScreenState extends State<JudgeBriefScreen> {
     await ProgressManager.instance.resetState();
     widget.state.restart();
     if (!mounted) return;
+    await AudioController.playMenu();
     Navigator.of(context).popUntil((route) => route.isFirst);
   }
 
@@ -1201,6 +1203,7 @@ class EndingScreen extends StatelessWidget {
                       await ProgressManager.instance.resetState();
                       state.restart();
                       if (context.mounted) {
+                        await AudioController.playMenu();
                         Navigator.of(
                           context,
                         ).popUntil((route) => route.isFirst);
