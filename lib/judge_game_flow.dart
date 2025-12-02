@@ -456,9 +456,36 @@ class _JudgeBriefScreenState extends State<JudgeBriefScreen> {
                   ),
                   const SizedBox(width: 14),
                   Expanded(
-                    child: Text(
-                      '${j.name} • ${j.level}\n\n${j.bio}',
-                      style: const TextStyle(fontSize: 16.5, height: 1.4),
+                    child: FutureBuilder(
+                      future: getJudge(),
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData) {
+                          return const Padding(
+                            padding: EdgeInsets.all(16),
+                            child: Center(child: CircularProgressIndicator()),
+                          );
+                        }
+
+                        final judge = snapshot.data!;
+
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              judge.name,
+                              style: const TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              judge.personality,
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                          ],
+                        );
+                      },
                     ),
                   ),
                 ],
@@ -785,6 +812,7 @@ class DonenessPickScreen extends StatefulWidget {
 
 class _DonenessPickScreenState extends State<DonenessPickScreen> {
   int _index = 1;
+  bool _serving = false;
 
   @override
   void initState() {
@@ -798,18 +826,25 @@ class _DonenessPickScreenState extends State<DonenessPickScreen> {
   // stores choosen doneness into 'selection'
   // the new code is here as doneness is the last part before evaluation
   Future<void> _serve() async {
-    final judgeProfile = widget
-        .state
-        .current; // capture before state advances - this fixes the issue after no AI feedback for the last judge
+    if (_serving) return; // stoop double tap
+    setState(() => _serving = true);
+
+    final judgeProfile = widget.state.current;
     widget.selection.doneness = Doneness.values[_index];
 
-    // Display the judge (AI) feedback and capture score
+    // show FIRST
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+
     final score = await _showFeedback(context, judgeProfile);
 
-    // record the result and go to next judge
+    if (mounted) Navigator.pop(context);
+
     widget.state.submit(widget.selection, score ?? 0);
 
-    // go to final stage or go to next judge if there is one
     final targetRoute = widget.state.isFinished
         ? '/judge_summary'
         : '/judge_brief';
@@ -823,7 +858,7 @@ class _DonenessPickScreenState extends State<DonenessPickScreen> {
           entry.remove();
           Navigator.pushReplacementNamed(
             context,
-            targetRoute, // NEW - refactored based on new targetRoute which is run AFTER the judge (AI) feedback
+            targetRoute,
             arguments: widget.state,
           );
         },
@@ -831,6 +866,7 @@ class _DonenessPickScreenState extends State<DonenessPickScreen> {
     );
 
     overlay.insert(entry);
+    setState(() => _serving = false);
   }
 
   // Imporant function that deals with judge (AI) feedback
@@ -839,16 +875,7 @@ class _DonenessPickScreenState extends State<DonenessPickScreen> {
     JudgeProfile judgeProfile,
   ) async {
     try {
-      final judge = Judge(
-        name: judgeProfile.name,
-        age: 30, // for now hardcoded
-        profession: judgeProfile.level,
-        fatPref: labelCut(judgeProfile.preferredCut),
-        tendernessPref: labelThickness(judgeProfile.preferredThickness),
-        crustPref: 'Crusty sear', // for now hardcoded
-        donenessPref: labelDoneness(judgeProfile.preferredDoneness),
-        personality: 'picky but fair', // for now hardcoded
-      );
+      final judge = await getJudge();
 
       final feedback = await getFeedback(
         judge: judge,

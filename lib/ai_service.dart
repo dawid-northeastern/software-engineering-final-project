@@ -92,11 +92,20 @@ Return STRICT JSON ONLY:
   "doneness_pref": "",
   "personality": ""
 }
-
 RULES:
-- All values must be SHORT (max 8 - 15 words), except for name, age and profession keep those simple.
 - Write preferences as general tendencies only.
-- NO full sentences.
+- The personality must be how they like thier steaks cooked keep inmind the player can only do thje following
+Cuts: fillet, ribeye, sirloin, rump, t-bone
+Thickness (cm): 1.5, 2, 3, 4, 5
+Doneness: rare, medium rare, medium, medium well, well done
+Methods: pan sear, grilling, reverse sear, broiling, sous vide
+do not put answers, more so hint at how they want the steak cooked
+Exmaples:
+  - Precision taster. Loves balance and tenderness; not keen on fatty bites. Prefers a thick, tender cut (like fillets) cooked gently to a medium rare
+  - Adventurous foodie. Enjoys bold flavors, less concerned about fat. Favors robust cuts (like ribeye) with a strong sear, cooked to medium
+  - Obsesses over a clean sear. Enjoys a nice fat cap on the side typically seen in sirloins. He likes a standard size cooked to medium well.
+  - make this about 24 words
+  
 - NO punctuation except commas.
 - JSON ONLY. No commentary, no sentences.
 - DO NOT reveal the exact steak they would choose.
