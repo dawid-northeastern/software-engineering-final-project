@@ -6,6 +6,8 @@ class ModuleScreen extends StatefulWidget {
   final List<String>?
   slideImages; // NEW - now slides also has image of the steaks, cuts, pans, boards
   final String questionText;
+  final List<String> options;
+  final int correctOptionIndex;
   final VoidCallback onComplete;
 
   const ModuleScreen({
@@ -13,6 +15,8 @@ class ModuleScreen extends StatefulWidget {
     required this.title,
     required this.slideTexts,
     required this.questionText,
+    required this.options,
+    required this.correctOptionIndex,
     required this.onComplete,
     this.slideImages,
   });
@@ -257,11 +261,7 @@ class _ModuleScreenState extends State<ModuleScreen> {
         ],
       );
     } else {
-      final options = [
-        (label: 'Option A', isCorrect: true),
-        (label: 'Option B', isCorrect: false),
-        (label: 'Option C', isCorrect: false),
-      ];
+      final labels = ['A', 'B', 'C'];
 
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -276,20 +276,13 @@ class _ModuleScreenState extends State<ModuleScreen> {
             style: const TextStyle(fontSize: 15, height: 1.4),
           ),
           const SizedBox(height: 16),
-          FilledButton(
-            onPressed: () => _answer(true),
-            child: const Text('Option A'),
-          ),
-          const SizedBox(height: 8),
-          FilledButton(
-            onPressed: () => _answer(false),
-            child: const Text('Option B'),
-          ),
-          const SizedBox(height: 8),
-          FilledButton(
-            onPressed: () => _answer(false),
-            child: const Text('Option C'),
-          ),
+          for (int i = 0; i < widget.options.length; i++) ...[
+            FilledButton(
+              onPressed: () => _answer(i == widget.correctOptionIndex),
+              child: Text('${labels[i]}) ${widget.options[i]}'),
+            ),
+            if (i != widget.options.length - 1) const SizedBox(height: 8),
+          ],
         ],
       );
     }

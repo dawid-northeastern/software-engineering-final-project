@@ -11,6 +11,8 @@ class ModuleInfo {
   final List<String> slideTexts;
   final List<String>? slideImages;
   final String questionText;
+  final List<String> options;
+  final int correctOptionIndex;
   ModuleStatus status;
 
   ModuleInfo({
@@ -18,6 +20,8 @@ class ModuleInfo {
     required this.title,
     required this.slideTexts,
     required this.questionText,
+    required this.options,
+    required this.correctOptionIndex,
     this.slideImages,
     this.status = ModuleStatus.notStarted,
   });
@@ -71,11 +75,13 @@ class _ModulesScreenState extends State<ModulesScreen> {
           'assets/sirloin.png',
           'assets/rump.jpg',
         ],
-        questionText:
-            'Option A: Fillet is the most tender cut but usually has a milder flavour.\n\n'
-            'Option B: Ribeye is the leanest cut with almost no fat.\n\n'
-            'Option C: Rump is softer and more tender than fillet.\n\n'
-            'Which statement about steak cuts is correct?',
+        questionText: 'Which statement best describes ribeye compared to rump?',
+        options: [
+          'Ribeye has heavy marbling and big beefy flavour when cooked to medium/medium-rare.',
+          'Fillet is fattier than ribeye and has the strongest flavour.',
+          'Rump is the most tender cut with the finest grain.',
+        ],
+        correctOptionIndex: 0,
       ),
 
       // -------------------- THICKNESS MODULE--------------------
@@ -102,10 +108,13 @@ class _ModulesScreenState extends State<ModulesScreen> {
           'assets/fillet.png',
         ],
         questionText:
-            'Option A: Around 2–2.5 cm is a good thickness for control, and thicker steaks need adjusted cooking time.\n\n'
-            'Option B: Thin 1 cm steaks are easiest because you never need to adjust timing.\n\n'
-            'Option C: Thickness doesn’t affect how you cook a steak.\n\n'
-            'Which statement about steak thickness is correct?',
+            'You have a very thin steak (around 2cm) steak. What approach keeps the centre juicy while getting a good crust?',
+        options: [
+          'Treat it like a thin steak; it won’t overcook.',
+          'Sear on low heat for a long time so a crust never forms.',
+          'Sear hot to build colour, then finish more gently (or in the oven) and rest to even out heat.',
+        ],
+        correctOptionIndex: 2,
       ),
 
       // -------------------- DONENESS MODULE --------------------
@@ -136,11 +145,13 @@ class _ModulesScreenState extends State<ModulesScreen> {
           'assets/ribeye.png',
           'assets/rump.jpg',
         ],
-        questionText:
-            'Option A: Medium-rare steak has a warm red centre and stays very juicy.\n\n'
-            'Option B: Well-done steak is the juiciest because it is cooked the longest.\n\n'
-            'Option C: Rare steak has no red in the centre.\n\n'
-            'Which statement about doneness is correct?',
+        questionText: 'Which statement about doneness is accurate?',
+        options: [
+          'Well-done steaks stay juiciest because they cook the longest.',
+          'Medium steak should have a warm pink centre and be firmer than medium-rare.',
+          'Rare steak has no red in the centre.',
+        ],
+        correctOptionIndex: 1,
       ),
 
       // -------------------- COOKING METHOD MODULE --------------------
@@ -172,10 +183,13 @@ class _ModulesScreenState extends State<ModulesScreen> {
           'assets/steak_resting.jpg',
         ],
         questionText:
-            'Option A: Use a very hot heavy pan, don’t overcrowd, oil the steak, season well, turn regularly and rest before serving.\n\n'
-            'Option B: Put many cold steaks into a medium pan so they slowly steam.\n\n'
-            'Option C: Skip resting to keep all the heat in the pan.\n\n'
-            'Which approach to searing and cooking is correct?',
+            'Which approach delivers the best sear and even cook on steaks?',
+        options: [
+          'Use a very hot heavy pan, oil the steak lightly, turn regularly, finish with butter/aromatics, and rest.',
+          'Put the steaks into a cold pan and gradually heat them up in a gentle manner.',
+          'Cook steaks without oil to avoid flare-ups and skip resting to keep them hot.',
+        ],
+        correctOptionIndex: 0,
       ),
     ];
 
@@ -238,6 +252,8 @@ class _ModulesScreenState extends State<ModulesScreen> {
           slideTexts: module.slideTexts,
           slideImages: module.slideImages,
           questionText: module.questionText,
+          options: module.options,
+          correctOptionIndex: module.correctOptionIndex,
           onComplete: () {
             setState(() {
               module.status = ModuleStatus.completed;
