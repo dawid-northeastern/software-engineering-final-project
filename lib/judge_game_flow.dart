@@ -166,7 +166,8 @@ class GameState {
   final List<JudgeResult> results = [];
   int index = 0;
 
-  JudgeProfile get current => judges[index];
+  JudgeProfile get current =>
+      judges[index.clamp(0, judges.length - 1)];
   bool get isFinished => index >= judges.length;
 
   // submit function was extended to not just record the choice

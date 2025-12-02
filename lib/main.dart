@@ -95,15 +95,12 @@ class _HomeScreenState extends State<HomeScreen> {
     AudioController.start();
   }
 
-  bool _practiceEnabled = false;
+  bool _practiceEnabled = true;
   bool _refreshScheduled = false;
 
   Future<void> _refreshPracticeEnabled() async {
-    final result = await ProgressManager.instance.loadState();
     if (!mounted) return;
-    setState(() {
-      _practiceEnabled = result.completedModules.length >= 4;
-    });
+    setState(() => _practiceEnabled = true);
   }
 
   @override
@@ -111,11 +108,8 @@ class _HomeScreenState extends State<HomeScreen> {
     super.didChangeDependencies();
 
     Future.microtask(() async {
-      final result = await ProgressManager.instance.loadState();
       if (!mounted) return;
-      setState(() {
-        _practiceEnabled = result.completedModules.length >= 4;
-      });
+      setState(() => _practiceEnabled = true);
     });
   }
 
