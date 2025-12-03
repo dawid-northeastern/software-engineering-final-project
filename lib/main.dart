@@ -198,7 +198,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       MaterialPageRoute(builder: (_) => const IntroScreen()),
                     );
                   },
-                  child: const Text('Begin: Learn and Practice Mode'),
+                  child: const Text('Begin Training Modules'),
                 ),
                 const SizedBox(height: 12),
                 FilledButton(
@@ -240,7 +240,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           );
                         }
                       : null,
-                  child: const Text('Begin: Practice Mode'),
+                  child: const Text('Start Practice'),
                 ),
               ],
             ),
