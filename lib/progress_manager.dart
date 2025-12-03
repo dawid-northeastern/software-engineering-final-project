@@ -86,15 +86,3 @@ class ProgressManager {
     await prefs.remove(_judgeUnlockedKey);
   }
 }
-
-// save value
-Future<void> saveValue(String value) async {
-  final prefs = await SharedPreferences.getInstance();
-  await prefs.setString('savedValue', value);
-}
-
-// load value
-Future<String?> loadValue() async {
-  final prefs = await SharedPreferences.getInstance();
-  return prefs.getString('savedValue');
-}
