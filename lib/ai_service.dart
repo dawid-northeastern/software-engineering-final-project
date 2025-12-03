@@ -93,6 +93,7 @@ Return STRICT JSON ONLY:
   "personality": ""
 }
 RULES:
+- Do NOT explicitly name the exact cut, thickness, or doneness; describe preferences indirectly so the player must rely on the knowledge to pick the right choices.
 - Write preferences as general tendencies only.
 - The personality must be how they like thier steaks cooked keep inmind the player can only do thje following
     Cuts: fillet, ribeye, sirloin, rump, t-bone
@@ -100,6 +101,8 @@ RULES:
     Doneness: rare, medium rare, medium, medium well, well done
     Methods: pan sear, grilling, reverse sear, broiling, sous vide
     This section is for how THEY LIKE THIER STEAKS COOKED not general personality
+    Do NOT explicitly name the exact cut, thickness, or doneness; describe preferences indirectly so the player must rely on the knowledge to pick the right choices.
+    THIS IS THE CRUCIAL POINT, THIS IS THE LEARNING APP AND USER HAS TO KNOW THE STEAKS, IT SHOULDN'T BE A MEMORY GAME SO DO NOT STATE THE STEAK CUT, DO NOT STATE STEAK DONENESS LEVEL, DO NOT STATE THICKNESS LEVEL - USER HAS TO KNOW HOW TO MAKE THAT CHOICES BASED ON A DESCRIPTION
 Examples:
   - Loves balance and tenderness, not keen on fatty bites, prefers a thick, tender cut like fillets cooked gently to a medium rare
   - Adventurous foodie, enjoys bold flavors, less concerned about fat, favors robust cuts like ribeye with a strong sear, cooked to medium
@@ -112,6 +115,7 @@ Examples:
 - NO punctuation except commas.
 - JSON ONLY. No commentary, no sentences.
 - DO NOT reveal the exact steak they would choose.
+- Do NOT explicitly name the exact cut, thickness, or doneness; describe preferences indirectly so the player must rely on the knowledge to pick the right choices.
 """;
 
   final body = jsonEncode({
