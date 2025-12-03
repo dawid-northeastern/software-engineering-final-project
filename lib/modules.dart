@@ -76,11 +76,11 @@ class _ModulesScreenState extends State<ModulesScreen> {
           'assets/sirloin.png',
           'assets/rump.jpg',
         ],
-        questionText: 'Which statement best describes ribeye compared to rump?',
+        questionText: 'Which statement is true about rump steak?',
         options: [
-          'Ribeye has heavy marbling and big beefy flavour when cooked to medium/medium-rare.',
-          'Fillet is fattier than ribeye and has the strongest flavour.',
-          'Rump is the most tender cut with the finest grain.',
+          'Rump is leaner and firmer than sirloin but still delivers strong beefy flavour',
+          'Rump is fattier than ribeye.',
+          'Rump steak is the most tender cut on the entire cow',
         ],
         correctOptionIndex: 0,
       ),
@@ -111,9 +111,9 @@ class _ModulesScreenState extends State<ModulesScreen> {
         questionText:
             'You have a very thin steak (around 2cm) steak. What approach keeps the centre juicy while getting a good crust?',
         options: [
-          'Treat it like a thin steak; it won’t overcook.',
-          'Sear on low heat for a long time so a crust never forms.',
-          'Sear hot to build colour, then finish more gently (or in the oven) and rest to even out heat.',
+          'Cook it low and slow on medium heat to avoid burning the outside.',
+          'Start by oven-baking it for a few minutes, then finish with a quick pan-sear.',
+          'Use very high heat and sear quickly on each side',
         ],
         correctOptionIndex: 2,
       ),
