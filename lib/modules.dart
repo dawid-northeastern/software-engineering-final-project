@@ -76,7 +76,7 @@ class _ModulesScreenState extends State<ModulesScreen> {
           'assets/sirloin.png',
           'assets/rump.jpg',
         ],
-        questionText: 'Whichsatement is true about rump steak?',
+        questionText: 'Which statement is true about rump steak?',
         options: [
           'Rump is leaner and firmer than sirloin but still delivers strong beefy flavour',
           'Rump is fattier than ribeye.',
