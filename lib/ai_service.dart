@@ -79,9 +79,9 @@ Future<Judge> getJudge() async {
   };
 
   final prompt = """
-Create a judge or customer for a STEAK COOKING ASSESSMENT.
+Create a judge/customer for a STEAK COOKING ASSESSMENT game.
 
-Return STRICT JSON ONLY:
+RETURN STRICT JSON ONLY:
 {
   "name": "",
   "age": 0,
@@ -92,30 +92,70 @@ Return STRICT JSON ONLY:
   "doneness_pref": "",
   "personality": ""
 }
-RULES:
-- Do NOT explicitly name the exact cut, thickness, or doneness; describe preferences indirectly so the player must rely on the knowledge to pick the right choices.
-- Write preferences as general tendencies only.
-- The personality must be how they like thier steaks cooked keep inmind the player can only do thje following
-    Cuts: fillet, ribeye, sirloin, rump, t-bone
-    Thickness (cm): 1.5, 2, 3, 4, 5
-    Doneness: rare, medium rare, medium, medium well, well done
-    Methods: pan sear, grilling, reverse sear, broiling, sous vide
-    This section is for how THEY LIKE THIER STEAKS COOKED not general personality
-    Do NOT explicitly name the exact cut, thickness, or doneness; describe preferences indirectly so the player must rely on the knowledge to pick the right choices.
-    THIS IS THE CRUCIAL POINT, THIS IS THE LEARNING APP AND USER HAS TO KNOW THE STEAKS, IT SHOULDN'T BE A MEMORY GAME SO DO NOT STATE THE STEAK CUT, DO NOT STATE STEAK DONENESS LEVEL, DO NOT STATE THICKNESS LEVEL - USER HAS TO KNOW HOW TO MAKE THAT CHOICES BASED ON A DESCRIPTION
-Examples:
-  - Loves balance and tenderness, not keen on fatty bites, prefers a thick, tender cut like fillets cooked gently to a medium rare
-  - Adventurous foodie, enjoys bold flavors, less concerned about fat, favors robust cuts like ribeye with a strong sear, cooked to medium
-  - Obsesses over sirloins, enjoys a nice fat cap on the side typically seen in sirloins, likes a standard size cooked to medium well
-  - likes 5cm+ steak, usually prefers a lean steak with a fat cap on the side, likes red inside
-  - make this about 24 words 
-  - make it various! like some are allowed to have bad taste like liking well done or sirloin etc
-  - The personality HAS TO MORE BE HOW THEY LIKE THIER STEAKS COOKED, its a preference profile
 
-- NO punctuation except commas.
-- JSON ONLY. No commentary, no sentences.
-- DO NOT reveal the exact steak they would choose.
-- Do NOT explicitly name the exact cut, thickness, or doneness; describe preferences indirectly so the player must rely on the knowledge to pick the right choices.
+═══════════════════════════════════════════════════════════
+CRITICAL RESTRICTION — ABSOLUTELY FORBIDDEN WORDS:
+═══════════════════════════════════════════════════════════
+NEVER use these terms anywhere in the output:
+
+CUTS: fillet, filet, ribeye, rib-eye, sirloin, rump, t-bone, tbone
+DONENESS: rare, medium rare, medium well, well done, medium (as doneness)
+THICKNESS: cm, centimeter, inch, 1.5, 2, 3, 4, 5, millimeter
+
+The player must INFER the correct choice from indirect clues. This is a knowledge test, not a memory exercise.
+
+═══════════════════════════════════════════════════════════
+USE THESE INDIRECT DESCRIPTORS INSTEAD:
+═══════════════════════════════════════════════════════════
+
+FOR FAT/MARBLING (implies cut):
+- "rich marbling throughout" / "loves fatty bites" → (implies ribeye)
+- "lean with a fat cap on the edge" / "clean fat on the side" → (implies sirloin)
+- "pristine and lean" / "no marbling" / "pure meat" → (implies fillet)
+- "budget-friendly and lean" / "firm and beefy" → (implies rump)
+- "enjoys two textures" / "likes bone-in" → (implies t-bone)
+
+FOR TENDERNESS (implies cut):
+- "butter-soft" / "fork-tender" / "melt in mouth" → (implies fillet)
+- "enjoys some chew" / "firmer bite" / "toothsome" → (implies sirloin/rump)
+
+FOR INTERIOR COLOR/TEMPERATURE (implies doneness):
+- "cool and red throughout" / "barely kissed by heat" → (implies rare)
+- "warm and rosy center" / "blushing pink inside" → (implies medium rare)
+- "pink but not bloody" / "gentle warmth through" → (implies medium)
+- "hint of blush remaining" / "mostly transformed" → (implies medium well)
+- "no pink whatsoever" / "cooked completely through" → (implies well done)
+
+FOR SIZE PREFERENCE (implies thickness):
+- "quick-searing cut" / "thinner slice" / "fast cook" → (implies thin)
+- "substantial piece" / "hearty portion" → (implies standard)
+- "steakhouse thick" / "impressive height" / "chunky cut" → (implies thick)
+
+═══════════════════════════════════════════════════════════
+PERSONALITY FIELD RULES:
+═══════════════════════════════════════════════════════════
+- About 20-30 words describing HOW they enjoy steak
+- Combine clues for fat, tenderness, interior, and size
+- Vary preferences — some refined, some casual, some with unconventional taste
+- NO forbidden words from the list above
+
+GOOD EXAMPLES:
+- "Appreciates butter-soft texture with no marbling, prefers a quick sear on a thinner slice, loves a warm rosy center"
+- "Bold eater who craves rich marbling throughout, wants a steakhouse-thick piece, enjoys it cooked completely through with a hard crust"
+- "Traditionalist who likes lean meat with a clean fat cap on the edge, standard portion, hint of blush remaining inside"
+- "Unfussy diner wanting budget-friendly firm beef, not too thick, no pink whatsoever"
+
+BAD EXAMPLES (FORBIDDEN):
+- "Loves fillet cooked medium rare" ← uses forbidden cut and doneness
+- "Prefers 3cm ribeye" ← uses forbidden measurement and cut
+- "Wants sirloin done medium well" ← uses forbidden cut and doneness
+
+═══════════════════════════════════════════════════════════
+OUTPUT RULES:
+═══════════════════════════════════════════════════════════
+- JSON only, no commentary
+- No punctuation except commas
+- Verify output contains ZERO forbidden words before returning
 """;
 
   final body = jsonEncode({
