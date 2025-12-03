@@ -541,12 +541,6 @@ class _CutPickScreenState extends State<CutPickScreen> {
     if (_picked == Cut.salad) {
       // Deals with the very wrong salad choice
       ProgressManager.instance.addIncorrect();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Incorrect answer: -10 Points'),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
       Navigator.pushReplacementNamed(
         context,
         '/judge_ending',
