@@ -132,44 +132,33 @@ class JudgeResult {
 // and the 'judges game' part, it's throughout the whole learning and the whole app
 // The final results and if the game was completed successfuly is based on that state managment
 class GameState {
-  final List<JudgeProfile> judges = const [
-    JudgeProfile(
-      name: 'Adam',
-      level: 'High-level judge',
-      bio:
-          'Precision taster. Loves balance and tenderness; not keen on fatty bites. Prefers a thick, tender cut (like fillets) cooked gently to a medium rare.',
-      portraitAsset: 'assets/judge1.png',
-      portraitAlign: Alignment(0, -0.28),
-      preferredCut: Cut.fillet,
-      preferredThickness: Thickness.thick,
-      preferredDoneness: Doneness.mediumRare,
-    ),
-    JudgeProfile(
-      name: 'Amanda',
-      level: 'Butcher judge',
-      bio:
-          'All about marbling and beefy aroma. Wants juice in every bite. A classic normal sized ribeye cooked to midway (medium)',
-      portraitAsset: 'assets/judge2.png',
-      portraitAlign: Alignment(0, -0.18),
-      preferredCut: Cut.ribeye,
-      preferredThickness: Thickness.standard,
-      preferredDoneness: Doneness.medium,
-    ),
-    JudgeProfile(
-      name: 'Lucas',
-      level: 'Technique judge',
-      bio:
-          'Obsesses over a clean sear. Enjoys a nice fat cap on the side typically seen in sirloins. He likes a standard size cooked to medium well.',
-      portraitAsset: 'assets/judge3.png',
-      portraitAlign: Alignment(0, -0.35),
-      preferredCut: Cut.sirloin,
-      preferredThickness: Thickness.standard,
-      preferredDoneness: Doneness.mediumWell,
-    ),
-  ];
+  final List<JudgeProfile> judges = [];
 
   final List<JudgeResult> results = [];
   int index = 0;
+
+  // 3 AI judges for judges list.
+  Future<void> generateAIJudges() async {
+    judges.clear();
+
+    for (int i = 0; i < 3; i++) {
+      final ai = await getJudge();
+
+      judges.add(
+        JudgeProfile(
+          name: ai.name,
+          level: ai.profession,
+          bio: ai.personality,
+          portraitAsset: 'assets/judge${(i % 3) + 1}.png',
+          preferredCut: Cut.fillet,
+          preferredThickness: Thickness.standard,
+          preferredDoneness: Doneness.medium,
+        ),
+      );
+    }
+
+    index = 0;
+  }
 
   JudgeProfile get current => judges[index.clamp(0, judges.length - 1)];
   bool get isFinished => index >= judges.length;
@@ -348,6 +337,34 @@ class _JudgeBriefScreenState extends State<JudgeBriefScreen> {
     //
     // GameState is passed into JudgeBriefScreen as widget.state
     // and now it's passed here to check if it's finished
+    if (widget.state.judges.isEmpty) {
+      return FutureBuilder(
+        future: widget.state.generateAIJudges(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState != ConnectionState.done) {
+            return Scaffold(
+              body: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: const [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 12),
+                    Text(
+                      'Generating judges...',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+          return JudgeBriefScreen(state: widget.state);
+        },
+      );
+    }
     if (widget.state.isFinished) {
       return SummaryScreen(state: widget.state);
     }
@@ -456,36 +473,19 @@ class _JudgeBriefScreenState extends State<JudgeBriefScreen> {
                   ),
                   const SizedBox(width: 14),
                   Expanded(
-                    child: FutureBuilder(
-                      future: getJudge(),
-                      builder: (context, snapshot) {
-                        if (!snapshot.hasData) {
-                          return const Padding(
-                            padding: EdgeInsets.all(16),
-                            child: Center(child: CircularProgressIndicator()),
-                          );
-                        }
-
-                        final judge = snapshot.data!;
-
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              judge.name,
-                              style: const TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              judge.personality,
-                              style: const TextStyle(fontSize: 16),
-                            ),
-                          ],
-                        );
-                      },
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          j.name,
+                          style: const TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(j.bio, style: const TextStyle(fontSize: 16)),
+                      ],
                     ),
                   ),
                 ],
@@ -875,7 +875,18 @@ class _DonenessPickScreenState extends State<DonenessPickScreen> {
     JudgeProfile judgeProfile,
   ) async {
     try {
-      final judge = await getJudge();
+      final ai = await getJudge();
+
+      final judge = Judge(
+        name: widget.state.current.name,
+        age: ai.age,
+        profession: widget.state.current.level,
+        fatPref: ai.fatPref,
+        tendernessPref: ai.tendernessPref,
+        crustPref: ai.crustPref,
+        donenessPref: ai.donenessPref,
+        personality: widget.state.current.bio,
+      );
 
       final feedback = await getFeedback(
         judge: judge,
@@ -1100,7 +1111,7 @@ class _ResultCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '${j.name} • ${result.score.toStringAsFixed(1)}/100',
+              '${j.name} : ${result.score.toStringAsFixed(1)}/100',
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 6),
